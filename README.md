@@ -10,6 +10,7 @@ This is a group project based on the data set listings.csv.
 ## Data Set:
 
 | Column Name | Data Type | Description |
+|---|---|---|
 | `id` | Integer | Primary key / Unique identifier for the listing |
 | `name` | Text | Name or title of the Airbnb listing |
 | `host_id` | Integer | Unique identifier for the property host |
@@ -32,6 +33,7 @@ This is a group project based on the data set listings.csv.
 
 
 ## Source:
+Sourced from Inside AirBnB
 https://insideairbnb.com/get-the-data/ - New Zealand
 
 
