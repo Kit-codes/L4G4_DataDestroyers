@@ -1,3 +1,5 @@
+# This task is only using June 2026 listings file.
+
 # 1. install tidyverse packages, uncomment it, only need run it once.
 # install.packages("tidyverse")
 
@@ -36,39 +38,7 @@ ggplot(chch_data, aes(x = price)) +
   )
 
 
-# 6. merge two plot into one
-price_comparison <- bind_rows(
-  nz_data_all |>
-    mutate(area = "All New Zealand"),
-  
-  chch_data_all |>
-    mutate(area = "Christchurch City")
-)
-
-ggplot(
-  price_comparison,
-  aes(
-    x = price,
-    fill = area
-  )
-) +
-  geom_histogram(
-    binwidth = 25,
-    position = "identity",
-    alpha = 0.5
-  ) +
-  coord_cartesian(
-    xlim = c(0, 1000)
-  ) +
-  labs(
-    title = "Airbnb Price Distribution: New Zealand vs Christchurch City",
-    x = "Price (NZD)",
-    y = "Count",
-    fill = "Area"
-  )
-
-
-# 7. calculate the day since last review
+# 6. calculate the day since last review
 publish_date <- as.Date("2026-06-19")
 
 nz_data <- nz_data |>
@@ -79,7 +49,7 @@ nz_data <- nz_data |>
     )
   )
 
-# 8. days since last review plot
+# 7. days since last review plot
 ggplot(
   nz_data,
   aes(x = days_since_last_review)
@@ -96,7 +66,7 @@ ggplot(
   )
 
 
-# 9. calculate top 10% number of reviews
+# 8. calculate top 10% number of reviews
 top_10_reviews <- nz_data |>
   slice_max(
     order_by = number_of_reviews,
