@@ -1,4 +1,4 @@
-# 1. install tidyverse packages, uncommetonly need run it once.
+# 1. install tidyverse packages, uncomment it, only need run it once.
 # install.packages("tidyverse")
 
 # 2. load library

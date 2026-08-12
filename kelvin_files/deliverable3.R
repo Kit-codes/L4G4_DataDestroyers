@@ -1,4 +1,7 @@
-# 1. install tidyverse packages, uncommetonly need run it once.
+# pre-download listings files into resource folder, 
+# and rename them with the listings_yyyy_mm.csv pattern.
+
+# 1. install tidyverse packages, uncomment it, only need run it once.
 # install.packages("tidyverse")
 
 # 2. load library
