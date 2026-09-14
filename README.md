@@ -69,4 +69,33 @@ Otherwise:
     reviews_per_month =
         number_of_reviews /
         ((scrape_date - first_review + 1) / (365 / 12))
+
+
+## Bond Data Set:
+
+| Column Name | Data Type | Description |
+|---|---|---|
+| `TimeFrame` | Date | Quarter the rental data relates to |
+| `Location Id` | Integer | Unique identifier for the location |
+| `Dwelling Type` | Text | Type of dwelling |
+| `Number Of Beds` | Integer | Number of bedrooms in the dwelling |
+| `Total Bonds` | Integer | Total number of rental bonds |
+| `Active Bonds` | Integer | Number of active rental bonds |
+| `Closed Bonds` | Integer | Number of closed rental bonds |
+| `Median Rent` | Currency | Median weekly rent in New Zealand Dollars (NZD) |
+| `Geometric Mean Rent` | Currency | Average weekly rent calculated using the geometric mean |
+| `Upper Quartile Rent` | Currency | Weekly rent at the upper quartile |
+| `Lower Quartile Rent` | Currency | Weekly rent at the lower quartile |
+| `Log Std Dev Weekly Rent` | Numeric | Measure of variation in weekly rent |
+
+## Bond Data Source:
+
+Sourced from Tenancy Services – Rental Bond Data
+
+Dataset: Detailed Quarterly Report, Q1 2020 – Q3 2026
+
+[Tenancy Services – Rental Bond Data](https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/)
 ```
+## Bond Data Description:
+
+The dataset contains quarterly rental bond information for different locations, dwelling types and numbers of bedrooms across New Zealand. The data includes rental bond counts and weekly rental prices.
