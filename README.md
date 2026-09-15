@@ -59,7 +59,6 @@ A listing may be unavailable because:
 
 ### Reviews per Month
 
-```
 If the number of days between the scrape date and the first review is 30 or fewer:
 
     reviews_per_month = number_of_reviews
