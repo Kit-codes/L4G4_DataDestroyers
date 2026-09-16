@@ -54,18 +54,6 @@ clean <- raw |>
 
 # 6. filter relevant rows ------------------------------------------------
 
-# The Airbnb dataset covers October 2025 to June 2026. 
-# The rental bond data was therefore restricted to the corresponding quarterly periods
-n_before_time <- nrow(clean)
-
-clean <- clean |>
-  filter(
-    TimeFrame >= as.Date("2025-10-01"),
-    TimeFrame <= as.Date("2026-04-01")
-  )
-
-n_after_time <- nrow(clean)
-n_time_removed <- n_before_time - n_after_time
 
 # The analysis focuses on Christchurch. 
 # `SA22026_code` from the Christchurch geographic area table was matched 
@@ -109,19 +97,6 @@ Four columns were removed because they are not required for the planned analysis
 - `Lower Quartile Rent` — removed because the analysis will use `Median Rent` for rental price comparisons.
 - `Log Std Dev Weekly Rent` — removed because rental price variation is not part of the planned analysis.
 
-## Time filtering
-
-The Airbnb dataset covers October 2025 to June 2026. The rental bond data was therefore restricted to the corresponding quarterly periods:
-
-- 2025-10-01
-- 2026-01-01
-- 2026-04-01
-
-Rows before time filtering: **{n_before_time}**
-
-Rows after time filtering: **{n_after_time}**
-
-Rows removed: **{n_time_removed}**
 
 ## Location filtering
 
@@ -132,6 +107,9 @@ Rows before Christchurch filtering: **{n_before_location}**
 Rows after Christchurch filtering: **{n_after_location}**
 
 Rows removed: **{n_location_removed}**
+
+### Note:
+Rows that contain Number of Beds = 'ALL' and 'NA' have been identified, but retained at this stage, as the number of bed is currently not in use, and the loss of data is significant (94305 rows from raw, 7280 from chritchurch area )
 
 ## Final dataset
 
