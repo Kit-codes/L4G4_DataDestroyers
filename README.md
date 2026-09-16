@@ -121,7 +121,7 @@ The dataset contains quarterly rental bond information for different locations, 
 
 ### Bond Data Cleaning Log
 __1. Filter on date range__  
- Oct 2025 to June 2026, to match Christchurch data
+ 01 Oct 2025 to 30 June 2026, to match Christchurch data
 
 
 

@@ -5,7 +5,7 @@
 library(tidyverse)
 source('~/L4G4_DataDestroyers/my_tools/data_summary.R')
 
-chch_data_all <- read.csv("resource/merged/chch_merged_files.csv")
+chch_data_all <- read.csv("resource/merged/airbnb_chch_merged_files.csv")
 
 #2. caculate summary statistics for all columns(except last_review and licence) 
 id_summary <- count_only_summary(chch_data_all, id)
