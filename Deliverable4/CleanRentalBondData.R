@@ -105,7 +105,7 @@ Rows after Christchurch filtering: **{n_after_location}**
 Rows removed: **{n_location_removed}**
 
 ### Note:
-Rows that contain Number of Beds = 'ALL' and 'NA' have been identified, but retained at this stage, as the number of bed is currently not in use, and the loss of data is significant (94305 rows from raw, 7280 from chritchurch area )
+Rows that contain Number of Beds = 'ALL' and 'NA' have been identified, but retained at this stage, as the number of bed is currently not in use, and the loss of data is significant (10782/27212 rows from raw, 800/2170 rows from Christchurch area)
 
 ## Final dataset
 
