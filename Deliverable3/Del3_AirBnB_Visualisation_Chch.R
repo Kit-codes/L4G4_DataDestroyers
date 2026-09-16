@@ -2,8 +2,8 @@
 library(tidyverse)
 source('~/L4G4_DataDestroyers/my_tools/topPercent.R')
 
-nz_data <- read.csv("resource/merged/airbnb_nz_merged_files.csv")
-chch_data <- read.csv("resource/merged/airbnb_chch_merged_files.csv")
+nz_data <- read.csv("output/merged/airbnb_nz_merged_files.csv")
+chch_data <- read.csv("output/merged/airbnb_chch_merged_files.csv")
 
 # 5. price plot
 ggplot(nz_data, aes(x = price)) +

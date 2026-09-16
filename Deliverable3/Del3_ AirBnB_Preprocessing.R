@@ -5,7 +5,7 @@ library(tidyverse)
 
 listings_folder <- "resource/airbnb_rawdata"
 
-merged_folder <- file.path("resource", "merged")
+merged_folder <- file.path("output", "merged")
 dir.create(merged_folder, recursive = TRUE, showWarnings = FALSE)
 nz_merged_file <- file.path(merged_folder, "airbnb_nz_merged_files.csv")
 chch_merged_file <- file.path(merged_folder, "airbnb_chch_merged_files.csv")
