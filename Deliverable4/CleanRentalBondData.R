@@ -54,7 +54,8 @@ clean <- raw |>
 
 # 6. filter relevant rows ------------------------------------------------
 
-# filter timeframe
+# The Airbnb dataset covers October 2025 to June 2026. 
+# The rental bond data was therefore restricted to the corresponding quarterly periods
 n_before_time <- nrow(clean)
 
 clean <- clean |>
@@ -66,7 +67,9 @@ clean <- clean |>
 n_after_time <- nrow(clean)
 n_time_removed <- n_before_time - n_after_time
 
-# filter christchurch locations
+# The analysis focuses on Christchurch. 
+# `SA22026_code` from the Christchurch geographic area table was matched 
+# with `Location Id` in the rental bond dataset.
 n_before_location <- nrow(clean)
 
 clean <- clean |>
