@@ -1,47 +1,13 @@
-# 1. install tidyverse packages, uncommetonly need run it once.
-# install.packages("tidyverse")
-
-# 2. load library
 
 
+
+#1. load library
 library(tidyverse)
 source('~/L4G4_DataDestroyers/my_tools/data_summary.R')
 
-# 3. setting folder and file path
-listings_folder <- "resource"
-merged_folder <- file.path("resource", "merged")
-dir.create(merged_folder, recursive = TRUE, showWarnings = FALSE)
-nz_merged_file <- file.path(merged_folder, "nz_merged_files.csv")
-chch_merged_file <- file.path(merged_folder, "chch_merged_files.csv")
+chch_data_all <- read.csv("resource/merged/chch_merged_files.csv")
 
-listings_files = list.files(
-  path = listings_folder,
-  pattern = "\\.csv$",
-  full.names = TRUE
-)
-
-# 4. read all new zealand listings files and add year_month column
-nz_data_all <- map_dfr(
-  listings_files,
-  ~ read_csv(.x) |>
-    mutate(
-      year_month = str_extract(basename(.x), "\\d{4}_\\d{2}")
-    )
-)
-
-
-# 5. filter christchurch city listings
-chch_data_all <- nz_data_all |>
-  filter(neighbourhood_group == "Christchurch City")
-
-# 6. save all new zealand listings and christchruch listings to csv file.
-write_csv(nz_data_all, nz_merged_file)
-write_csv(chch_data_all, chch_merged_file)
-
-
-
-
-# 8. caculate summary statistics for all columns(except last_review and licence) 
+#2. caculate summary statistics for all columns(except last_review and licence) 
 id_summary <- count_only_summary(chch_data_all, id)
 name_summary <- count_only_summary(chch_data_all, name)
 host_id_summary <- count_only_summary(chch_data_all, host_id)
@@ -60,7 +26,7 @@ availability_365_summary <- numeric_summary(chch_data_all, availability_365)
 number_of_reviews_ltm_summary <- numeric_summary(chch_data_all, number_of_reviews_ltm)
 
 
-# 9. output to a markdown file
+# 3. output to a markdown file
 summary_tables <- list(
   "ID" = id_summary,
   "Name" = name_summary,
