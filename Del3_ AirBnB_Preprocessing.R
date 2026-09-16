@@ -2,12 +2,13 @@
 
 library(tidyverse)
 # 3. setting folder and file path
-listings_folder <- "resource"
+
+listings_folder <- "resource/airbnb_rawdata"
 
 merged_folder <- file.path("resource", "merged")
 dir.create(merged_folder, recursive = TRUE, showWarnings = FALSE)
-nz_merged_file <- file.path(merged_folder, "nz_merged_files.csv")
-chch_merged_file <- file.path(merged_folder, "chch_merged_files.csv")
+nz_merged_file <- file.path(merged_folder, "airbnb_nz_merged_files.csv")
+chch_merged_file <- file.path(merged_folder, "airbnb_chch_merged_files.csv")
 
 listings_files = list.files(
   path = listings_folder,
