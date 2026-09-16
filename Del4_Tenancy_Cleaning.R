@@ -1,18 +1,16 @@
-# 1. install tidyverse packages, un comment only need run it once.
-# install.packages("tidyverse")
-
-
-# 2. load library
+#####################
+# Tenancy Data Cleaning
+# Date: 16/9/2026
+####################
 
 library(tidyverse)
-source('~/L4G4_DataDestroyers/my_tools/data_summary.R') # conf
 
 
 # 3. setup paths
-input_file   <- file.path("resource", "merged", "chch_merged_files.csv")
+input_file   <- file.path("resource", "merged", "tenancy_data.csv")
 cleaned_dir  <- file.path("resource", "cleaned")
-output_file  <- file.path(cleaned_dir, "chch_listings_clean.csv.gz")
-log_file     <- file.path(cleaned_dir, "chch_cleaning_log.md")
+output_file  <- file.path(cleaned_dir, "tenancy_clean.csv.gz")
+log_file     <- file.path(cleaned_dir, "tenancy_cleaning_log.md")
 dir.create(cleaned_dir, recursive = TRUE)
 
 
@@ -33,12 +31,12 @@ log_lines <- c(
 
 
 # 4. dropped columns with no analytical value 
-  
+
 # license: 100% missing in this data set: zero information, drop entirely
 # neighbourhood_group: constant "Christchurch City", no analytical value
 # name, host_name: personal-identifier columns not needed for numeric analysis, 
 #                   also privacy considerations.
-  
+
 dropped_cols <- c("license", "neighbourhood_group", "name", "host_name")
 
 log_lines <- c(log_lines,
