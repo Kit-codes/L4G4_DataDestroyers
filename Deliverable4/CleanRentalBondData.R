@@ -1,14 +1,10 @@
-#1. install tidyverse packages, un comment only need run it once. ----
-# install.packages("tidyverse")
-
-
-# 2. load library --------------------------------------------------------
+# 1. load library --------------------------------------------------------
 
 library(tidyverse)
 
 
-# 3. setup paths ---------------------------------------------------------
-input_file    <- file.path("resource","Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv")
+# 2. setup paths ---------------------------------------------------------
+input_file    <- file.path("output","merged", "tenancy_data.csv")
 chcharea_file <- file.path("resource", "geographic_area_table_2026_chch.csv")
 cleaned_dir   <- file.path("output", "cleaned")
 output_file   <- file.path(cleaned_dir, "rental_bond_clean.csv.gz")
@@ -16,7 +12,7 @@ log_file      <- file.path(cleaned_dir, "rental_bond_cleaning_log.md")
 dir.create(cleaned_dir, recursive = TRUE, showWarnings = FALSE)
 
 
-# 4. load data ----
+# 3. load data ----
 raw <- read_csv(input_file)
 n_start <- nrow(raw)
 
@@ -28,7 +24,7 @@ chch_areas <- chch_areas |>
   )
 
 
-# 5. dropped columns with no analytical value ------------------------------
+# 4. dropped columns with no analytical value ------------------------------
 
 # Based on Deliverable 5
 # 
@@ -52,7 +48,7 @@ clean <- raw |>
   select(-any_of(dropped_cols))
 
 
-# 6. filter relevant rows ------------------------------------------------
+# 5. filter relevant rows ------------------------------------------------
 
 
 # The analysis focuses on Christchurch. 
@@ -62,19 +58,19 @@ n_before_location <- nrow(clean)
 
 clean <- clean |>
   filter(
-    `Location Id` %in% chch_areas$SA22026_code
+    `Location.Id` %in% chch_areas$SA22026_code
   )
 
 n_after_location <- nrow(clean)
 n_location_removed <- n_before_location - n_after_location
 
 
-# 7. Save cleaned data ----------------------------------------------------
+# 6. Save cleaned data ----------------------------------------------------
 
 write_csv(clean, output_file)
 
 
-# 8. Create cleaning log -------------------------------------------------
+# 7. Create cleaning log -------------------------------------------------
 
 n_final <- nrow(clean)
 

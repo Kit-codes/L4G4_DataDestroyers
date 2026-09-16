@@ -7,9 +7,8 @@
 library(tidyverse)
 
 # 1. read tenancy data file
-
-save_path <- file.path("resource", "merged","tenancy_data.csv")
-tenancy_data_full <- read.csv ("resource/tenancy_rawdata/tenancy_2020Q1_2026_Q3.csv")
+save_path <- file.path("output", "merged","tenancy_data.csv")
+tenancy_data_full <- read.csv ("resource/Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv")
 
                          
 # filter dataset  to only include dates from 01 October 2025 to 30 June 2026
@@ -19,3 +18,4 @@ tenancy_data <- tenancy_data_full |>
 
 # 6. save all New Zealand listings and Christchurch listings to csv file.
 write_csv(tenancy_data, save_path)
+
