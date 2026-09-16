@@ -7,7 +7,7 @@ This is a group project based on the data set listings.csv.
 
 ## Installation:
 
-## Data Set:
+## AirBnB Data Set:
 
 | Column Name | Data Type | Description |
 |---|---|---|
@@ -32,13 +32,13 @@ This is a group project based on the data set listings.csv.
 
 
 
-## Source:
+### Source:
 Sourced from Inside AirBnB
 https://insideairbnb.com/get-the-data/ - New Zealand
 
 
-## notice
-### Room Type Categories
+### Note:
+#### Room Type Categories
 
 The room_type column may contain the following values:
 
@@ -46,7 +46,7 @@ The room_type column may contain the following values:
 - Private room: Guests have a private bedroom but may share other spaces.
 - Shared room: Guests share the sleeping area with other people.
 
-### Availability_365
+#### Availability_365
 
 The availability_365 value should not be interpreted directly as the number of vacant days.
 
@@ -57,7 +57,7 @@ A listing may be unavailable because:
 - the listing is temporarily inactive; or
 - booking restrictions have been applied.
 
-### Reviews per Month
+#### Reviews per Month
 
 If the number of days between the scrape date and the first review is 30 or fewer:
 
@@ -69,6 +69,24 @@ Otherwise:
         number_of_reviews /
         ((scrape_date - first_review + 1) / (365 / 12))
 
+
+
+### Christchurch Data Cleaning Log
+
+__1.  Dropped columns with no analytical value__   
+license: 100% missing in this data set: zero information, drop entirely  
+neighbourhood_group: constant "Christchurch City", no analytical value  
+name, host_name: personal-identifier columns not needed for numeric analysis, also privacy considerations.  
+
+  
+__2.  Handled missing prices__  
+price is important to rent comparison with the bond dataset,so rows with no price are not usable for that purpose. We drop them rather than impute, since imputing a price would fabricate rent data.  
+
+__Result:__   
+Number of rows lost: 10667  
+Remaining rows:  18128  
+
+___
 
 ## Bond Data Set:
 
@@ -87,14 +105,28 @@ Otherwise:
 | `Lower Quartile Rent` | Currency | Weekly rent at the lower quartile |
 | `Log Std Dev Weekly Rent` | Numeric | Measure of variation in weekly rent |
 
-## Bond Data Source:
+### Bond Data Source:
 
 Sourced from Tenancy Services – Rental Bond Data
 
 Dataset: Detailed Quarterly Report, Q1 2020 – Q3 2026
 
 [Tenancy Services – Rental Bond Data](https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/)
-```
-## Bond Data Description:
+
+
+### Bond Data Description:
 
 The dataset contains quarterly rental bond information for different locations, dwelling types and numbers of bedrooms across New Zealand. The data includes rental bond counts and weekly rental prices.
+
+
+### Bond Data Cleaning Log
+__1. Filter on date range__  
+ Oct 2025 to June 2026, to match Christchurch data
+
+
+
+__2.  Dropped columns with no analytical value__   
+
+
+
+__
