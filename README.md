@@ -70,22 +70,6 @@ Otherwise:
         ((scrape_date - first_review + 1) / (365 / 12))
 
 
-
-### Christchurch Data Cleaning Log
-
-__1.  Dropped columns with no analytical value__   
-license: 100% missing in this data set: zero information, drop entirely  
-neighbourhood_group: constant "Christchurch City", no analytical value  
-name, host_name: personal-identifier columns not needed for numeric analysis, also privacy considerations.  
-
-  
-__2.  Handled missing prices__  
-price is important to rent comparison with the bond dataset,so rows with no price are not usable for that purpose. We drop them rather than impute, since imputing a price would fabricate rent data.  
-
-__Result:__   
-Number of rows lost: 10667  
-Remaining rows:  18128  
-
 ___
 
 ## Bond Data Set:
@@ -118,16 +102,6 @@ Dataset: Detailed Quarterly Report, Q1 2020 – Q3 2026
 ### Bond Data Description:
 
 The dataset contains quarterly rental bond information for different locations, dwelling types and numbers of bedrooms across New Zealand. The data includes rental bond counts and weekly rental prices.
-
-
-### Bond Data Cleaning Log
-__1. Filter on date range__  
- 01 Oct 2025 to 30 June 2026, to match Christchurch data
-
-
-
-__2.  Dropped columns with no analytical value__   
-
 
 
 __
