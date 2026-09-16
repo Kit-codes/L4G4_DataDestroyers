@@ -1,4 +1,4 @@
-# 1. install tidyverse packages, un comment only need run it once. ----
+#1. install tidyverse packages, un comment only need run it once. ----
 # install.packages("tidyverse")
 
 
@@ -8,7 +8,7 @@ library(tidyverse)
 
 
 # 3. setup paths ---------------------------------------------------------
-input_file    <- file.path("resource", "Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv")
+input_file    <- file.path("resource","Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv")
 chcharea_file <- file.path("resource", "geographic_area_table_2026_chch.csv")
 cleaned_dir   <- file.path("output", "cleaned")
 output_file   <- file.path(cleaned_dir, "rental_bond_clean.csv.gz")
