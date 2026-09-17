@@ -106,4 +106,3 @@ writeLines(log_text, log_file)
 
 
 
-
