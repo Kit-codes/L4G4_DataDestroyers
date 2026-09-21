@@ -18,11 +18,6 @@ n_start <- nrow(raw)
 
 chch_areas <- read_csv(chcharea_file)
 
-chch_areas <- chch_areas |>
-  mutate(
-    SA22026_code = as.character(SA22026_code)
-  )
-
 
 # 4. dropped columns with no analytical value ------------------------------
 
@@ -38,10 +33,10 @@ chch_areas <- chch_areas |>
 #   not needed because rental price variation is not part of the planned analysis.
 
 dropped_cols <- c(
-  "Geometric Mean Rent", 
-  "Upper Quartile Rent", 
-  "Lower Quartile Rent", 
-  "Log Std Dev Weekly Rent"
+  "Geometric.Mean.Rent", 
+  "Upper.Quartile.Rent", 
+  "Lower.Quartile.Rent", 
+  "Log.Std.Dev.Weekly.Rent"
 )
 
 clean <- raw |>
