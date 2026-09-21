@@ -210,8 +210,18 @@ cat(
 full_join_summary <- airbnb_bond_all |>
   summarise(
     total_rows = n(),
-    matched_rows = sum(!is.na(`Median Rent`)),
-    unmatched_rows = sum(is.na(`Median Rent`))
+    
+    matched_rows = sum(
+      !is.na(id) & !is.na(TimeFrame)
+    ),
+    
+    airbnb_only_rows = sum(
+      !is.na(id) & is.na(TimeFrame)
+    ),
+    
+    bond_only_rows = sum(
+      is.na(id) & !is.na(TimeFrame)
+    )
   )
 
 print(full_join_summary)
