@@ -102,6 +102,15 @@ Dataset: Detailed Quarterly Report, Q1 2020 – Q3 2026
 ### Bond Data Description:
 
 The dataset contains quarterly rental bond information for different locations, dwelling types and numbers of bedrooms across New Zealand. The data includes rental bond counts and weekly rental prices.
+___
+
+## Area Code Data (Koordinates)
+
+__Dataset:__  Statistical Area 2 2026  
+__Description:__   definitive version of statistical area 2 (SA2) boundaries as at 1 January 2026, as defined by Stats NZ. This version contains 2,311 SA2s (excluding the 16 with empty or null geometries (non-digitised)).  
+__Layer ID:__  123515  
+__Link:__  https://koordinates.com/from/datafinder.stats.govt.nz/layer/123515-statistical-area-2-2026/  
+__Created by:__ Geospatial and Data Acquisition Team, Stats NZ (Stats NZ – Tatauranga Aotearoa)  
 
 
 __
