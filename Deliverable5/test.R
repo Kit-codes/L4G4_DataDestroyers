@@ -11,7 +11,7 @@ library(httr2)
 # 2. setup ---------------------------------------------------------------
 
 layer_id <- "123515"
-api_key  <- "e90c597def394bbe89d3405f9f1dd68f" # paste api key here
+api_key  <- "paste_key_here" # paste api key here
 
 input_file  <- "output/cleaned/chch_listings_clean.csv.gz"
 output_file <- "output/cleaned/chch_listings_with_area.csv.gz"
