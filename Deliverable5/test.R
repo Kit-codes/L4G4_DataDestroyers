@@ -7,11 +7,10 @@
 library(tidyverse)
 library(httr2)
 
-
 # 2. setup ---------------------------------------------------------------
 
 layer_id <- "123515"
-api_key  <- "paste_key_here" # paste api key here
+api_key  <- "" # paste api key here
 
 input_file  <- "output/cleaned/chch_listings_clean.csv.gz"
 output_file <- "output/cleaned/chch_listings_with_area.csv.gz"
@@ -116,3 +115,4 @@ sum(is.na(listings_with_area$SA22026_code))
 # listings in an area from the Christchurch area table
 chch <- read_csv(chch_file, col_types = cols(.default = col_character()))
 mean(listings_with_area$SA22026_code %in% chch$SA22026_code)
+
