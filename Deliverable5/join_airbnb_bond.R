@@ -32,7 +32,7 @@ output_dir <- file.path(
 # Join with all bond categories
 output_all <- file.path(
   output_dir,
-  "airbnb_bond_join_all.csv.gz"
+  "airbnb_bond_full_join.csv.gz"
 )
 
 dir.create(
