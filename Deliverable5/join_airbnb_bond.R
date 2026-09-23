@@ -56,7 +56,7 @@ airbnb <- read_csv(
 bond <- read_csv(
   bond_file,
   col_types = cols(
-    `Location Id` = col_character()
+    `Location.Id` = col_character()
   )
 )
 
@@ -70,10 +70,10 @@ airbnb_required <- c(
 
 bond_required <- c(
   "TimeFrame",
-  "Location Id",
-  "Dwelling Type",
-  "Number Of Beds",
-  "Median Rent"
+  "Location.Id",
+  "Dwelling.Type",
+  "Number.Of.Beds",
+  "Median.Rent"
 )
 
 missing_airbnb <- setdiff(
@@ -139,7 +139,7 @@ bond <- bond |>
 
 common_area_codes <- intersect(
   unique(airbnb$SA22026_code),
-  unique(bond$`Location Id`)
+  unique(bond$`Location.Id`)
 )
 
 common_quarters <- intersect(
@@ -155,7 +155,7 @@ cat(
 
 cat(
   "Bond location IDs:",
-  n_distinct(bond$`Location Id`),
+  n_distinct(bond$`Location.Id`),
   "\n"
 )
 
@@ -180,7 +180,7 @@ airbnb_bond_all <- airbnb |>
   full_join(
     bond,
     by = c(
-      "SA22026_code" = "Location Id",
+      "SA22026_code" = "Location.Id",
       "quarter_start"
     ),
     relationship = "many-to-many"
@@ -242,4 +242,5 @@ cat(
   output_all,
   "\n"
 )
+
 
