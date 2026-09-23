@@ -44,21 +44,30 @@ build_req <- function(lat, lon) {
 
 # takes the answer from Koordinates and pulls out the area code
 # gives NA if the query failed or the point isn't inside any area
-get_area_code <- function(resp) {
-  if (!inherits(resp, "httr2_response")) return(NA_character_)
-  if (resp_status(resp) != 200) return(NA_character_)
+get_area_info <- function(resp) {
+  NA_location <- tibble(
+    SA22026_code = NA_character_,
+    SA22026_name = NA_character_
+  )
+  if (!inherits(resp, "httr2_response")) return( NA_location )
+  if (resp_status(resp) != 200) return(NA_location)
   
   layers <- resp_body_json(resp)$vectorQuery$layers
-  if (length(layers) == 0) return(NA_character_)
+  if (length(layers) == 0) return(NA_location)
   features <- layers[[1]]$features
-  if (length(features) == 0) return(NA_character_)
+  if (length(features) == 0) return(NA_location)
   
   props <- features[[1]]$properties
   
   # the area code column starts with SA2
   fields     <- names(props)
   code_field <- fields[grepl("^SA2", fields) & !grepl("NAME|ASCII", fields)][1]
-  as.character(props[[code_field]])
+  name_field <- fields[grepl("^SA2", fields) & grepl("NAME", fields)][1]
+  
+  tibble(
+    SA22026_code = as.character(props[[code_field]]),
+    SA22026_name = as.character(props[[name_field]])
+  )
 }
 
 
@@ -68,7 +77,7 @@ test_resp <- build_req(listings$latitude[1], listings$longitude[1]) |>
   req_perform()
 
 resp_status(test_resp)
-get_area_code(test_resp) # should be a 6 digit area code
+get_area_info(test_resp) # should be a 6 digit area code
 
 
 # 6. query all locations ------------------------------------------------
@@ -87,8 +96,11 @@ if (file.exists(lookup_file)) {
   reqs  <- map2(unique_locations$latitude, unique_locations$longitude, build_req)
   resps <- req_perform_parallel(reqs, on_error = "continue", max_active = 8)
   
-  lookup <- tibble(coord_key    = unique_locations$coord_key,
-                   SA22026_code = map_chr(resps, get_area_code))
+  lookup <- tibble(
+    coord_key = unique_locations$coord_key,
+    area_info = map(resps, get_area_info)
+  ) |>
+    unnest(area_info)
   
   if (all(is.na(lookup$SA22026_code))) {
     stop("No area codes came back. Check the api_key and layer_id.")
