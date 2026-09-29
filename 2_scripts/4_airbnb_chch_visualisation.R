@@ -1,11 +1,16 @@
+#-------------------------------------------------------------------------------
+#AirBnB Christchurch visualizations
+
 
 library(tidyverse)
-source('~/L4G4_DataDestroyers/my_tools/topPercent.R')
+source(here("2_scripts","0_tools","topPercent.R"))
+#-------------------------------------------------------------------------------
+#LOAD DATA
+nz_data <- read_csv(here("3_output", "airbnb_nz_preprocessed.csv"))
+chch_data <- read_csv(here("3_output", "airbnb_chch_preprocessed.csv"))
 
-nz_data <- read.csv("output/merged/airbnb_nz_merged_files.csv")
-chch_data <- read.csv("output/merged/airbnb_chch_merged_files.csv")
-
-# 5. price plot
+#-------------------------------------------------------------------------------
+#price plot
 ggplot(nz_data, aes(x = price)) +
   geom_histogram(binwidth = 20) +
   coord_cartesian(xlim = c(0, 5000)) + # 0-5000 span
@@ -24,8 +29,8 @@ ggplot(chch_data, aes(x = price)) +
     y = "Count"
   )
 
-
-# 6. merge two plot into one
+#-------------------------------------------------------------------------------
+#merge two plot into one
 price_comparison <- bind_rows(
   nz_data |>
     mutate(area = "All New Zealand"),
@@ -56,15 +61,15 @@ ggplot(
     fill = "Area"
   )
 
-
-# 7. calculate the day since last review
-publish_date <- as.Date("2026-06-19")
+#-------------------------------------------------------------------------------
+#calculate the day since last review
+airbnb_collection_date <- as.Date("2026-06-19")
 
 chch_data <- chch_data |>
   mutate(
     last_review = as.Date(last_review),
     days_since_last_review = as.numeric(
-      publish_date - last_review
+      airbnb_collection_date  - last_review
     )
   )
 
@@ -85,9 +90,9 @@ ggplot(
   )
 
 
-
+#-------------------------------------------------------------------------------
 # 9. calculate top 10% number of reviews
-top_10_reviews <- topPercent(chch_data, chch_data$number_of_reviews, 0.1 )
+top_10_reviews <- topPercent(nz_data, nz_data$number_of_reviews, 0.1 )
 
 
 
