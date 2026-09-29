@@ -1,41 +1,19 @@
-# 1. install packages, uncomment if needed -----------------------------------
-
-# install.packages("tidyverse")
-
-
-# 2. load packages ------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#compare the number of beds per location airbnb vs tenancy
 
 library(tidyverse)
+library(here)
 
 
-# 3. setup paths ---------------------------------------------------------
 
-airbnb_file <- file.path(
-  "output",
-  "cleaned",
-  "chch_listings_with_area.csv.gz"
-)
+# set paths---------------------------------------------------------------------
 
-bond_file <- file.path(
-  "output",
-  "cleaned",
-  "rental_bond_clean.csv.gz"
-)
+airbnb_file <- here("3_output","airbnb_chch_cleaned_witharea.csv")
+bond_file <- here("3_output","tenancy_chch_cleaned.csv")
+area_lookup_file <- here("3_output", "area_code_lookup.csv")
+output_file <- here("3_output","airbnb_rental_properties_count_by_location.csv")
 
-area_lookup_file <- file.path(
-  "output",
-  "cleaned",
-  "area_code_lookup.csv"
-)
-
-output_file <- file.path(
-  "output",
-  "cleaned",
-  "airbnb_rental_properties_count_by_location.csv"
-)
-
-
-# 4. load data -----------------------------------------------------------
+#LOAD DATA----------------------------------------------------------------------
 
 airbnb <- read_csv(
   airbnb_file,
