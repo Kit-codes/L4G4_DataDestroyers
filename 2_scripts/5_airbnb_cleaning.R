@@ -1,28 +1,17 @@
-# 1. install tidyverse packages, un comment only need run it once. ----
-# install.packages("tidyverse")
+#-------------------------------------------------------------------------------
+#AirBnB Christchurch Data Cleaning
 
-
-# 2. load library --------------------------------------------------------
 
 library(tidyverse)
+library(here)
+#------------------------------------------------------------------------------
+#LOAD DATA
+airbnb_chch_raw <- read_csv(here("3_output", "airbnb_chch_preprocessed.csv"))
 
-# source('my_tools/data_summary.R') # look like this code was never used.
+n_start <- nrow(airbnb_chch_raw)
 
-
-# 3. setup paths ---------------------------------------------------------
-input_file   <- file.path("output", "merged", "chch_merged_files.csv")
-cleaned_dir  <- file.path("output", "cleaned")
-output_file  <- file.path(cleaned_dir, "chch_listings_clean.csv.gz")
-log_file     <- file.path(cleaned_dir, "chch_cleaning_log.md")
-dir.create(cleaned_dir, recursive = TRUE, showWarnings = FALSE)
-
-
-# 4. load data ----
-raw <- read_csv(input_file)
-n_start <- nrow(raw)
-
-
-# 5. dropped columns with no analytical value ------------------------------
+#------------------------------------------------------------------------------
+#Cleaning step - remove columns
 
 # license: 
 #   100% missing in this data set: zero information, drop entirely
@@ -41,34 +30,34 @@ dropped_cols <- c(
   "host_name"
 )
 
-clean <- raw |>
-  select(-any_of(dropped_cols))
+airbnb_chch_clean <- airbnb_chch_raw|>
+                        select(-any_of(dropped_cols))
 
-
-# 6. Handle missing prices ------------------------------------------------
+#-------------------------------------------------------------------------------
+# Cleaning Step - Handle missing prices 
 
 # price is important to next week's rent comparison with the bond dataset,so rows 
 # with no price are not usable for that purpose. We drop them rather than impute, 
 # since imputing a price would fabricate rent data.
 
 
-n_before_price <- nrow(clean)
+n_before_price <- nrow(airbnb_chch_clean)
 
-clean <- clean |>
-  filter(!is.na(price))
+airbnb_chch_clean <- airbnb_chch_clean |>
+                        filter(!is.na(price))
 
-n_after_price <- nrow(clean)
-
+#Document Step
+n_after_price <- nrow(airbnb_chch_clean)
 n_price_dropped <- n_before_price - n_after_price
 
 
-# 7. Save cleaned data ----------------------------------------------------
+#-------------------------------------------------------------------------------
+#OUPUT
+write_csv(airbnb_chch_clean, here("3_output","airbnb_chch_cleaned.csv"))
 
-write_csv(clean, output_file)
 
-
-# 8. Create cleaning log --------------------------------------------------
-
+#-------------------------------------------------------------------------------
+#CLEANING LOG
 log_text <- glue::glue(
   "
 # Christchurch Listings - Cleaning Log
@@ -76,7 +65,7 @@ log_text <- glue::glue(
 ## Dataset summary
 
 - Rows in input dataset: **{n_start}**
-- Rows in cleaned dataset: **{nrow(clean)}**
+- Rows in cleaned dataset: **{nrow(airbnb_chch_clean)}**
 
 ## Columns removed
 
@@ -96,7 +85,7 @@ were not observed in the original listings.
 "
 )
 
-writeLines(log_text, log_file)
+writeLines(log_text,here("4_documentation","chch_cleaning_log.md"))
 
 
 
