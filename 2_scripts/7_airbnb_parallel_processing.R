@@ -1,21 +1,25 @@
-# Deliverable 5: get the Stats NZ area code (SA2 2026) for each Airbnb listing
+
+#-------------------------------------------------------------------------------
+#Get the Stats NZ area code (SA2 2026) for each Airbnb listing
 # using the Koordinates Query API.
 
 
-# 1. load library --------------------------------------------------------
+#load library-
 
 library(tidyverse)
 library(httr2)
+library(here)
 
-# 2. setup ---------------------------------------------------------------
-
+#-------------------------------------------------------------------------------
+# koordinates API key and layer id
 layer_id <- "123515"
 api_key  <- "" # paste api key here
 
-input_file  <- "output/cleaned/chch_listings_clean.csv.gz"
-output_file <- "output/cleaned/chch_listings_with_area.csv.gz"
-lookup_file <- "output/cleaned/area_code_lookup.csv"
-chch_file   <- "resource/geographic_area_table_2026_chch.csv"
+#-------------------------------------------------------------------------------
+input_file  <- here("3_output","airbnb_chch_cleaned.csv")
+output_file <- here("3_output","airbnb_chch_cleaned_witharea.csv.")
+lookup_file <- here("3_output","area_code_lookup.csv")
+chch_file   <- here("1_data","geographic_area_table_2026_chch.csv")
 
 
 # 3. load data -----------------------------------------------------------
