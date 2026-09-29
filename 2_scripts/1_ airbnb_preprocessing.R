@@ -34,7 +34,7 @@ chch_data_all <- nz_data_all |>
 #OUTPUT
 #save all New Zealand listings and Christchurch listings to csv file.
 
-write_csv(nz_data_all, here("3_output", "airbnb_nz_prepocessed.csv"))
+write_csv(nz_data_all, here("3_output", "airbnb_nz_preprocessed.csv"))
 write_csv(chch_data_all, here("3_output","airbnb_chch_preprocessed.csv"))
 
 

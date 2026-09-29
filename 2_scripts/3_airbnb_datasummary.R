@@ -1,14 +1,17 @@
+#-------------------------------------------------------------------------------
+#AirBnB Data Summary
 
 
-
-
-#1. load library
 library(tidyverse)
-source('~/L4G4_DataDestroyers/my_tools/data_summary.R')
+library(here)
+source(here("2_scripts","0_tools","data_summary.R"))
+#------------------------------------------------------------------------------
+#LOAD
 
-chch_data_all <- read.csv("output/merged/airbnb_chch_merged_files.csv")
+chch_data_all <- read_csv(here("3_output","airbnb_chch_preprocessed.csv"))
 
-#2. caculate summary statistics for all columns(except last_review and licence) 
+#------------------------------------------------------------------------------
+# calculate summary statistics for all columns(except last_review and licence) 
 id_summary <- count_only_summary(chch_data_all, id)
 name_summary <- count_only_summary(chch_data_all, name)
 host_id_summary <- count_only_summary(chch_data_all, host_id)
@@ -26,8 +29,8 @@ calculated_host_listings_count_summary <- numeric_summary(chch_data_all, calcula
 availability_365_summary <- numeric_summary(chch_data_all, availability_365)
 number_of_reviews_ltm_summary <- numeric_summary(chch_data_all, number_of_reviews_ltm)
 
-
-# 3. output to a markdown file
+#-------------------------------------------------------------------------------
+#output to a markdown file
 summary_tables <- list(
   "ID" = id_summary,
   "Name" = name_summary,
@@ -45,11 +48,6 @@ summary_tables <- list(
   "Calculated Host Listings Count" = calculated_host_listings_count_summary,
   "Availability 365" = availability_365_summary,
   "Number of Reviews LTM" = number_of_reviews_ltm_summary
-)
-
-summary_md_file <- file.path(
-  merged_folder,
-  "chch_summary.md"
 )
 
 md_content <- c(
@@ -70,9 +68,8 @@ for (title in names(summary_tables)) {
     ""
   )
 }
+#-------------------------------------------------------------------------------
+#OUTPUT
+writeLines(md_content,here("4_documentation", "chch_summary.md"))
 
-writeLines(
-  md_content,
-  summary_md_file
-)
 
