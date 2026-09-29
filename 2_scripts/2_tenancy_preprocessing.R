@@ -1,21 +1,21 @@
-#####################
-# Tenancy Data Preprocessing
+#------------------------------------------------------------------------------- 
+# Tenancy Data Pre Processing
 # Date: 16/9/2026
-####################
-
 
 library(tidyverse)
-
+library(here)
+#-------------------------------------------------------------------------------
+#LOAD DATA
 # 1. read tenancy data file
-save_path <- file.path("output", "merged","tenancy_data.csv")
-tenancy_data_full <- read.csv ("resource/Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv")
+tenancy_data_full <- read_csv(here("1_data","Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv"))
 
-                         
-# filter dataset  to only include dates from 01 October 2025 to 30 June 2026
+#-------------------------------------------------------------------------------
+# filter dataset to only include dates from 01 October 2025 to 30 June 2026
 tenancy_data <- tenancy_data_full |>
-  filter(between(TimeFrame,"2025-10-01", "2026-06-30")) 
+                  filter(between(TimeFrame,as.Date("2025-10-01"), as.Date("2026-06-30")))
       
 
-# 6. save all New Zealand listings and Christchurch listings to csv file.
-write_csv(tenancy_data, save_path)
+#-------------------------------------------------------------------------------
+#OUTPUT
+write_csv(tenancy_data, here("3_output","tenancy_full.csv"))
 
