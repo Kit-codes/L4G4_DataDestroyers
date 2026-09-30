@@ -33,7 +33,9 @@ dropped_cols <- c(
 tenancy_chch_clean <- tenancy_chch_raw |>
                           select(-any_of(dropped_cols))
 
-
+#-------------------------------------------------------------------------------
+#check
+str(tenancy_chch_clean)
 #-------------------------------------------------------------------------------
 #OUTPUT
 write_csv(tenancy_chch_clean, here("3_output","tenancy_chch_cleaned.csv"))
@@ -45,7 +47,7 @@ n_final <- nrow(tenancy_chch_clean)
 
 log_text <- glue::glue(
   "
-# Rental Bond Data — Cleaning Log
+# Tenancy Data — Cleaning Log
 
 ## Dataset summary
 
