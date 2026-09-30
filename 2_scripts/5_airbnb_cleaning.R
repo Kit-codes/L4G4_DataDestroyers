@@ -71,7 +71,7 @@ log_text <- glue::glue(
 
 ## Columns removed
 
-- `license`: all values were missing.
+- `license`: all values were missing, and not needed for analysis
 - `neighbourhood_group`: constant after Christchurch filtering.
 - `name`: listing title not required for the planned analysis.
 - `host_name`: not required for the planned analysis.
