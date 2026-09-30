@@ -130,5 +130,4 @@ sum(is.na(listings_with_area$SA22026_code))
 
 # listings in an area from the Christchurch area table
 chch <- read_csv(chch_file, col_types = cols(.default = col_character()))
-mean(listings_with_area$SA22026_code %in% chch$SA22026_code)
 
