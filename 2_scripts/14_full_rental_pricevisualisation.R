@@ -49,3 +49,4 @@ price_plot2 <- ggplot(area_with_ward_diffs,aes(x = WARD2023_name,y = price_diff)
       geom_bar(stat = "identity")
 
 price_plot2
+
