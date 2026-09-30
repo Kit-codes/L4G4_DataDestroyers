@@ -17,7 +17,7 @@ api_key  <- "" # paste api key here
 
 #-------------------------------------------------------------------------------
 input_file  <- here("3_output","airbnb_chch_cleaned.csv")
-output_file <- here("3_output","airbnb_chch_cleaned_witharea.csv.")
+output_file <- here("3_output","airbnb_chch_cleaned_witharea.csv")
 lookup_file <- here("3_output","area_code_lookup.csv")
 chch_file   <- here("1_data","geographic_area_table_2026_chch.csv")
 

@@ -24,10 +24,10 @@ n_start <- nrow(tenancy_chch_raw)
 #   not needed because rental price variation is not part of the planned analysis.
 
 dropped_cols <- c(
-  "Geometric.Mean.Rent", 
-  "Upper.Quartile.Rent", 
-  "Lower.Quartile.Rent", 
-  "Log.Std.Dev.Weekly.Rent"
+  "Geometric Mean Rent", 
+  "Upper Quartile Rent", 
+  "Lower Quartile Rent", 
+  "Log Std Dev Weekly Rent"
 )
 
 tenancy_chch_clean <- tenancy_chch_raw |>
