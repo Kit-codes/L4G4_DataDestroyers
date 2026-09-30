@@ -58,7 +58,7 @@ airbnb_count <- airbnb |>
 
 rental_count <- bond |>
   filter(
-    TimeFrame == "2026/04/01",   # use the latest: 2026-04-01
+    TimeFrame == "2026-04-01",   # use the latest: 2026-04-01
     `Dwelling Type` == "ALL",    # only use ALL type 
     `Number Of Beds` == "ALL"    # only use ALL type
   ) |>

@@ -50,7 +50,9 @@ airbnb_chch_clean <- airbnb_chch_clean |>
 n_after_price <- nrow(airbnb_chch_clean)
 n_price_dropped <- n_before_price - n_after_price
 
-
+#-------------------------------------------------------------------------------
+#check
+str(airbnb_chch_clean)
 #-------------------------------------------------------------------------------
 #OUPUT
 write_csv(airbnb_chch_clean, here("3_output","airbnb_chch_cleaned.csv"))
@@ -69,7 +71,7 @@ log_text <- glue::glue(
 
 ## Columns removed
 
-- `license`: all values were missing.
+- `license`: all values were missing, and not needed for analysis
 - `neighbourhood_group`: constant after Christchurch filtering.
 - `name`: listing title not required for the planned analysis.
 - `host_name`: not required for the planned analysis.

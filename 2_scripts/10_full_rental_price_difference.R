@@ -2,6 +2,7 @@
 #Find the loaction with the  maximum difference in price per night between airbnb and long term rentals
 
 library(tidyverse)
+library(here)
 library(dplyr)
 #-------------------------------------------------------------------------------------------------------
 full_summary <- read.csv(here("3_output","full_rental_summary_bylocation.csv"))

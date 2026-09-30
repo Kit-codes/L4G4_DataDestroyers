@@ -21,7 +21,8 @@ airbnb_summary <- airbnb_full |>
                                      Number_of_Airbnb_properties = table(SA22026_code)[1])   
 
 #check theres still the correct number of properties - should be the same as number of rows in the airbnb dataset
-check <- sum(as.numeric(airbnb_summary$Number_of_Airbnb_properties))
+check <- sum(as.numeric(airbnb_summary$Number_of_Airbnb_properties))== nrow(airbnb_full)
+check
 
 #append the area codes corresponding suburb name
 airbnb_summary <-   left_join(airbnb_summary, area_codes|> select(SA22026_code,SA22026_name))
