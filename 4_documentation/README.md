@@ -2,10 +2,51 @@
 DATA201/422 Group Project Group L4G4
 
 ## Description:
-This is a group project based on the data set listings.csv.
-!!!Cont desc!!!
+This project compares New Zealand's short-term (Airbnb) and long-term (rental bond) 
+housing markets in Christchurch. Airbnb listings and Tenancy Services rental bond 
+data are each matched to Stats NZ Statistical Area 2 (SA2) geographic areas.
+Airbnb listings via their latitude/longitude through the Koordinates Query API, 
+and rental bond records via their existing `Location Id` so the two datasets 
+can be compared and summarised side by side, down to SA2 and ward level.
 
 ## Installation:
+
+1. Clone the repository and open `L4G4_DataDestroyers.Rproj` in RStudio.
+2. Run `renv::restore()` to install the exact package versions the project was built with (see `renv.lock`).
+3. Get a free Koordinates account and API key at (https://koordinates.com) needed for `2_scripts/7_airbnb_parallel_processing.R` (see **Area Code Data** below).
+   Paste your key into the `api_key` variable at the top of that script, **or**, preferably, set `KOORDINATES_API_KEY=your_key_here` in a local `.Renviron` file 
+   (already gitignored, never commit the API key) and read it in the script with `Sys.getenv("KOORDINATES_API_KEY")`.
+
+## Project Structure:
+
+```
+1_data/          Raw and reference data (Airbnb listings, tenancy bond data, Stats NZ area tables)
+2_scripts/       Numbered R scripts, run in order, see Pipeline below
+3_output/        Cleaned, joined and summarised data produced by the scripts
+4_documentation/ Cleaning logs, summaries and this README
+z_Bin/           Old/superseded scripts kept for reference
+```
+
+## Pipeline:
+
+Run the scripts in `2_scripts/` in numeric order:
+
+| # | Script | What it does |
+|---|---|---|
+| 1 | `1_ airbnb_preprocessing.R` | Preprocesses the raw NZ-wide Airbnb listings |
+| 2 | `2_tenancy_preprocessing.R` | Preprocesses the raw tenancy bond data |
+| 3 | `3_airbnb_datasummary.R` | Produces summary statistics for the Airbnb data |
+| 4 | `4_airbnb_chch_visualisation.R` | Visualisations of Christchurch Airbnb listings |
+| 5 | `5_airbnb_cleaning.R` | Cleans the Christchurch Airbnb data |
+| 6 | `6_tenancy_cleaning.R` | Cleans the Christchurch tenancy data |
+| 7 | `7_airbnb_parallel_processing.R` | Looks up each Airbnb listing's Stats NZ SA2 area code via the Koordinates API |
+| 8 | `8_full_rental_summarise_location.R` | Summarises Airbnb and tenancy data by SA2 and joins them together |
+| 9 | `9_airbnb_medianprice_chch_central.R` | Median Airbnb price for central Christchurch |
+| 10 | `10_full_rental_price_difference.R` | Finds the location with the largest Airbnb vs long-term rent price gap |
+| 11 | `11_full_rental_compare_properties.R` | Compares Airbnb vs tenancy property counts by SA2 |
+| 12 | `12_full_rental_grouping.R` | Groups the SA2 level summary up to ward level |
+
+Shared helper functions used by the scripts above live in `2_scripts/0_tools/`.
 
 ## AirBnB Data Set:
 
@@ -102,7 +143,6 @@ Dataset: Detailed Quarterly Report, Q1 2020 – Q3 2026
 ### Bond Data Description:
 
 The dataset contains quarterly rental bond information for different locations, dwelling types and numbers of bedrooms across New Zealand. The data includes rental bond counts and weekly rental prices.
-___
 
 ## Area Code Data (Koordinates)
 
@@ -112,5 +152,16 @@ __Layer ID:__  123515
 __Link:__  https://koordinates.com/from/datafinder.stats.govt.nz/layer/123515-statistical-area-2-2026/  
 __Created by:__ Geospatial and Data Acquisition Team, Stats NZ (Stats NZ – Tatauranga Aotearoa)  
 
+___
 
-__
+## Ward / Geographic Areas Data
+
+__Dataset:__ Geographic Areas Table 2023 (meshblock-level concordance)  
+__Description:__ Stats NZ table mapping every 2023 meshblock to its SA1, SA2, ward, territorial authority and other geographic classifications. Used in `12_full_rental_grouping.R` to attach a ward to each SA2 area code, filtered to `TA2023_name == "Christchurch City"`.  
+__File:__ `1_data/geographic-areas-table-2023.csv`  
+__Source:__ Stats NZ – Tatauranga Aotearoa, via [datafinder.stats.govt.nz](https://datafinder.stats.govt.nz/)  
+
+__Notes:__
+- SA2 codes matched exactly between the 2026 SA2 boundaries (used for the Airbnb area codes) and this 2023-vintage table, for all 179 Christchurch SA2 areas.
+- SA2 boundaries don't always sit inside a single ward: 44 of Christchurch's 179 SA2 areas span more than one ward. Each is assigned to whichever ward contains the most meshblocks of that SA2 (the majority ward) -- see `3_output/sa2_to_ward_lookup.csv` for the full crosswalk, including how many wards each SA2 touched.
+- One SA2 (`363800`) is coded "Area Outside Territorial Authority" in the Stats NZ table and has no ward assigned.
