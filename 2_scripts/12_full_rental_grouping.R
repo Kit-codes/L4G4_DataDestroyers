@@ -87,3 +87,6 @@ print(ward_summary, n = Inf)
 write_csv(ward_summary, ward_summary_output)
 
 cat("\nSaved ward-level summary to:\n", ward_summary_output, "\n")
+
+str(ward_summary
+  )
