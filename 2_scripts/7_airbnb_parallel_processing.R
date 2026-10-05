@@ -1,28 +1,27 @@
-
 #-------------------------------------------------------------------------------
-#Get the Stats NZ area code (SA2 2026) for each Airbnb listing
-# using the Koordinates Query API.
-
-
-#load library-
+# Get the Stats NZ area code (SA2 2026) for each Airbnb listing using the
+# Koordinates Query API.
+#
+# Only coordinates that are not already in the cached lookup
+# (3_output/area_code_lookup.csv) are sent to the API, so adding new months of
+# data only queries the new locations. If nothing is new, no API key is needed.
 
 library(tidyverse)
 library(httr2)
 library(here)
 
 #-------------------------------------------------------------------------------
-# koordinates API key and layer id
+# koordinates layer id and API key (key lives in .Renviron, never in the code)
 layer_id <- "123515"
-api_key  <- "" # paste api key here
+api_key  <- Sys.getenv("KOORDINATES_API_KEY")
 
 #-------------------------------------------------------------------------------
-input_file  <- here("3_output","airbnb_chch_cleaned.csv")
-output_file <- here("3_output","airbnb_chch_cleaned_witharea.csv")
-lookup_file <- here("3_output","area_code_lookup.csv")
-chch_file   <- here("1_data","geographic_area_table_2026_chch.csv")
+input_file  <- here("3_output", "airbnb_chch_cleaned.csv")
+output_file <- here("3_output", "airbnb_chch_cleaned_witharea.csv")
+lookup_file <- here("3_output", "area_code_lookup.csv")
+chch_file   <- here("1_data", "geographic_area_table_2026_chch.csv")
 
-
-# 3. load data -----------------------------------------------------------
+# load data ----------------------------------------------------------------
 
 # ID read as text
 listings <- read_csv(input_file,
@@ -33,7 +32,7 @@ listings <- listings |>
   mutate(coord_key = sprintf("%.7f,%.7f", latitude, longitude))
 
 
-# 4. functions -----------------------------------------------------------
+# functions ----------------------------------------------------------------
 
 # builds the query for one location (x is longitude, y is latitude)
 build_req <- function(lat, lon) {
@@ -53,7 +52,7 @@ get_area_info <- function(resp) {
     SA22026_code = NA_character_,
     SA22026_name = NA_character_
   )
-  if (!inherits(resp, "httr2_response")) return( NA_location )
+  if (!inherits(resp, "httr2_response")) return(NA_location)
   if (resp_status(resp) != 200) return(NA_location)
   
   layers <- resp_body_json(resp)$vectorQuery$layers
@@ -75,59 +74,71 @@ get_area_info <- function(resp) {
 }
 
 
-# 5. test one query ------------------------------------------------------
+# look up only the NEW locations ---------------------------------------------
 
-test_resp <- build_req(listings$latitude[1], listings$longitude[1]) |>
-  req_perform()
-
-resp_status(test_resp)
-get_area_info(test_resp) # should be a 6 digit area code
-
-
-# 6. query all locations ------------------------------------------------
-
-# if the lookup file already exists use it instead of querying again
+# existing cache (empty if this is the first run)
 if (file.exists(lookup_file)) {
-  
   lookup <- read_csv(lookup_file, col_types = cols(.default = col_character()))
-  
 } else {
+  lookup <- tibble(coord_key = character(),
+                   SA22026_code = character(),
+                   SA22026_name = character())
+}
+
+new_locations <- listings |>
+  filter(!is.na(latitude), !is.na(longitude), !coord_key %in% lookup$coord_key) |>
+  distinct(coord_key, .keep_all = TRUE)
+
+message(nrow(new_locations), " new locations to look up (",
+        nrow(lookup), " already cached)")
+
+if (nrow(new_locations) > 0) {
   
-  unique_locations <- listings |>
-    filter(!is.na(latitude), !is.na(longitude)) |>
-    distinct(coord_key, .keep_all = TRUE)
+  if (!nzchar(api_key)) {
+    stop("KOORDINATES_API_KEY is not set. Add it to .Renviron and restart R.")
+  }
   
-  reqs  <- map2(unique_locations$latitude, unique_locations$longitude, build_req)
+  reqs  <- map2(new_locations$latitude, new_locations$longitude, build_req)
   resps <- req_perform_parallel(reqs, on_error = "continue", max_active = 8)
   
-  lookup <- tibble(
-    coord_key = unique_locations$coord_key,
+  new_lookup <- tibble(
+    coord_key = new_locations$coord_key,
     area_info = map(resps, get_area_info)
   ) |>
     unnest(area_info)
   
-  if (all(is.na(lookup$SA22026_code))) {
+  if (all(is.na(new_lookup$SA22026_code))) {
     stop("No area codes came back. Check the api_key and layer_id.")
   }
+  
+  # only cache successful lookups, so failed requests are retried next run
+  lookup <- bind_rows(lookup, filter(new_lookup, !is.na(SA22026_code))) |>
+    distinct(coord_key, .keep_all = TRUE)
   
   write_csv(lookup, lookup_file)
 }
 
 
-# 7. add the area codes to the listings ----------------------------------
+# add the area codes to the listings -----------------------------------------
 
 listings_with_area <- listings |>
   left_join(select(lookup, coord_key, SA22026_code), by = "coord_key") |>
   select(-coord_key)
 
+# sanity check: the join must not add or lose rows
+stopifnot(nrow(listings_with_area) == nrow(listings))
+
 write_csv(listings_with_area, output_file)
 
 
-# 8. checks! -------------------------------------------------------------
+# checks -----------------------------------------------------------------------
 
 # listings with no area code
-sum(is.na(listings_with_area$SA22026_code))
+n_missing <- sum(is.na(listings_with_area$SA22026_code))
+if (n_missing > 0) warning(n_missing, " listings have no SA2 area code")
 
 # listings in an area from the Christchurch area table
 chch <- read_csv(chch_file, col_types = cols(.default = col_character()))
-
+cat("Listings with no area code:", n_missing, "\n")
+cat("Listings outside the Christchurch area table:",
+    sum(!listings_with_area$SA22026_code %in% chch$SA22026_code), "\n")
