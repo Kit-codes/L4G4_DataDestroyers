@@ -4,11 +4,11 @@
 
 library(tidyverse)
 library(here)
-source(here("2_scripts","0_tools","topPercent.R"))
+source(here("02_scripts","00_tools","topPercent.R"))
 #-------------------------------------------------------------------------------
 #LOAD DATA
-nz_data <- read_csv(here("3_output", "airbnb_nz_preprocessed.csv"))
-chch_data <- read_csv(here("3_output", "airbnb_chch_preprocessed.csv"))
+nz_data <- read_csv(here("03_output", "airbnb_nz_preprocessed.csv"))
+chch_data <- read_csv(here("03_output", "airbnb_chch_preprocessed.csv"))
 
 #-------------------------------------------------------------------------------
 #price plot

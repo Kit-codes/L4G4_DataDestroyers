@@ -7,7 +7,7 @@ library(here)
 #-------------------------------------------------------------------------------
 #LOAD DATA
 
-listings_folder <- here("1_data","1_airbnb_rawdata")
+listings_folder <- here("01_data","01_airbnb_rawdata")
 
 listings_files = list.files(
                     path = listings_folder,
@@ -34,8 +34,8 @@ chch_data_all <- nz_data_all |>
 #OUTPUT
 #save all New Zealand listings and Christchurch listings to csv file.
 
-write_csv(nz_data_all, here("3_output", "airbnb_nz_preprocessed.csv"))
-write_csv(chch_data_all, here("3_output","airbnb_chch_preprocessed.csv"))
+write_csv(nz_data_all, here("03_output", "airbnb_nz_preprocessed.csv"))
+write_csv(chch_data_all, here("03_output","airbnb_chch_preprocessed.csv"))
 
 
 

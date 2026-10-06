@@ -6,7 +6,7 @@ library(tidyverse)
 library(here)
 #------------------------------------------------------------------------------
 # LOAD
-tenancy_chch_raw <- read_csv(here("3_output","tenancy_chch_preprocessed.csv"))
+tenancy_chch_raw <- read_csv(here("03_output","tenancy_chch_preprocessed.csv"))
 
 n_start <- nrow(tenancy_chch_raw)
 
@@ -38,7 +38,7 @@ tenancy_chch_clean <- tenancy_chch_raw |>
 str(tenancy_chch_clean)
 #-------------------------------------------------------------------------------
 #OUTPUT
-write_csv(tenancy_chch_clean, here("3_output","tenancy_chch_cleaned.csv"))
+write_csv(tenancy_chch_clean, here("03_output","tenancy_chch_cleaned.csv"))
 
 
 #-------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ The cleaned data was saved as `rental_bond_clean.csv`.
 "
 )
 
-writeLines(log_text, here("4_documentation", "rental_bond_cleaning_log.md"))
+writeLines(log_text, here("04_documentation", "rental_bond_cleaning_log.md"))
 
 
 

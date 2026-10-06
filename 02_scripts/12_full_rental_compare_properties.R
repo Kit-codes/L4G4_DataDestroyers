@@ -8,11 +8,11 @@ library(here)
 
 # set paths---------------------------------------------------------------------
 
-airbnb_file <- here("3_output","airbnb_chch_cleaned_witharea.csv")
+airbnb_file <- here("03_output","airbnb_chch_cleaned_witharea.csv")
 
-bond_file <- here("3_output","tenancy_chch_cleaned.csv")
-area_lookup_file <- here("3_output", "area_code_lookup.csv")
-output_file <- here("3_output","airbnb_rental_properties_count_by_location.csv")
+bond_file <- here("03_output","tenancy_chch_cleaned.csv")
+area_lookup_file <- here("0_output", "area_code_lookup.csv")
+output_file <- here("03_output","airbnb_rental_properties_count_by_location.csv")
 
 #LOAD DATA----------------------------------------------------------------------
 

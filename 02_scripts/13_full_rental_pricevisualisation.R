@@ -7,7 +7,7 @@ library(here)
 
 #-------------------------------------------------------------------------------
 #load data
-area_with_ward  <- read_csv(here("3_output", "full_rental_summary_byward.csv"))
+area_with_ward  <- read_csv(here("03_output", "full_rental_summary_byward.csv"))
 
 str(area_with_ward)
 

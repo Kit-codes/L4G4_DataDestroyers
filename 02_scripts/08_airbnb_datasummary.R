@@ -4,11 +4,11 @@
 
 library(tidyverse)
 library(here)
-source(here("2_scripts","0_tools","data_summary.R"))
+source(here("02_scripts","00_tools","data_summary.R"))
 #------------------------------------------------------------------------------
 #LOAD
 
-chch_data_all <- read_csv(here("3_output","airbnb_chch_preprocessed.csv"))
+chch_data_all <- read_csv(here("03_output","airbnb_chch_preprocessed.csv"))
 
 #------------------------------------------------------------------------------
 # calculate summary statistics for all columns(except last_review and licence) 
@@ -70,6 +70,6 @@ for (title in names(summary_tables)) {
 }
 #-------------------------------------------------------------------------------
 #OUTPUT
-writeLines(md_content,here("4_documentation", "chch_summary.md"))
+writeLines(md_content,here("04_documentation", "chch_summary.md"))
 
 
