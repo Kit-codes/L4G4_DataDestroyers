@@ -40,7 +40,7 @@ price_comparison <- bind_rows(
     mutate(area = "Christchurch City")
 )
 
-price_plot <- ggplot(
+ggplot(
   price_comparison,
   aes(
     x = price,
@@ -63,20 +63,36 @@ price_plot <- ggplot(
   )
 
 #-------------------------------------------------------------------------------
-# calculate days since last review
+#calculate the day since last review
+airbnb_collection_date <- as.Date("2026-06-19")
 
 chch_data <- chch_data |>
-  mutate(last_review = as.Date(last_review)) |>
-  group_by(year_month) |>
   mutate(
-    snapshot_date = max(last_review, na.rm = TRUE),
-    days_since_last_review = as.numeric(snapshot_date - last_review)
-  ) |>
-  ungroup()
+    last_review = as.Date(last_review),
+    days_since_last_review = as.numeric(
+      airbnb_collection_date  - last_review
+    )
+  )
+
+# 8. days since last review plot
+ggplot(
+  chch_data,
+  aes(x = days_since_last_review)
+) +
+  coord_cartesian(xlim = c(-10, 1000)) + # 0-1000 span
+  geom_histogram(
+    binwidth = 5,
+    na.rm = TRUE
+  ) +
+  labs(
+    title = "Distribution of Days Since Last Review",
+    x = "Days Since Last Review",
+    y = "Count"
+  )
 
 
 #-------------------------------------------------------------------------------
-# calculate top 10% number of reviews
+# 9. calculate top 10% number of reviews
 top_10_reviews <- topPercent(nz_data, nz_data$number_of_reviews, 0.1 )
 
 
@@ -90,5 +106,3 @@ top_10_reviews |>
     )
   )
 
-ggsave(file.path(plots_dir, "airbnb_price_distribution.png"), price_plot,
-       width = 9, height = 6, dpi = 150)
