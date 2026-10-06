@@ -1,22 +1,20 @@
-#-------------------------------------------------------------------------------
-#AirBnB Data Summary
-
-
+#--- AirBnb Data Summary -------------------------------------------------------
+# Load Libraries
 library(tidyverse)
 library(here)
 source(here("02_scripts","00_tools","data_summary.R"))
-#------------------------------------------------------------------------------
-#LOAD
 
+#--- Load Data -----------------------------------------------------------------
 chch_data_all <- read_csv(here("03_output","airbnb_chch_preprocessed.csv"))
 
-#------------------------------------------------------------------------------
-# calculate summary statistics for all columns(except last_review and licence) 
+#--- Summary statistics --------------------------------------------------------
+# Calculate summary statistics for all columns(except last_review and licence) 
 id_summary <- count_only_summary(chch_data_all, id)
 name_summary <- count_only_summary(chch_data_all, name)
 host_id_summary <- count_only_summary(chch_data_all, host_id)
 host_name_summary <- count_only_summary(chch_data_all, host_name)
-neighbourhood_group_summary <- categories_summary(chch_data_all, neighbourhood_group)
+neighbourhood_group_summary <- categories_summary(chch_data_all, 
+                                                  neighbourhood_group)
 neighbourhood_summary <- categories_summary(chch_data_all, neighbourhood)
 latitude_summary <- count_only_summary(chch_data_all, latitude)
 longitude_summary <- count_only_summary(chch_data_all, longitude)
@@ -25,12 +23,13 @@ price_summary <- numeric_summary(chch_data_all, price)
 minimum_nights_summary <- numeric_summary(chch_data_all, minimum_nights)
 number_of_reviews_summary <- numeric_summary(chch_data_all, number_of_reviews)
 reviews_per_month_summary <- numeric_summary(chch_data_all, reviews_per_month)
-calculated_host_listings_count_summary <- numeric_summary(chch_data_all, calculated_host_listings_count)
+calculated_host_listings_count_summary <- numeric_summary(chch_data_all, 
+                                                          calculated_host_listings_count)
 availability_365_summary <- numeric_summary(chch_data_all, availability_365)
-number_of_reviews_ltm_summary <- numeric_summary(chch_data_all, number_of_reviews_ltm)
+number_of_reviews_ltm_summary <- numeric_summary(chch_data_all, 
+                                                 number_of_reviews_ltm)
 
-#-------------------------------------------------------------------------------
-#output to a markdown file
+#--- Summary -------------------------------------------------------------------
 summary_tables <- list(
   "ID" = id_summary,
   "Name" = name_summary,
@@ -68,8 +67,6 @@ for (title in names(summary_tables)) {
     ""
   )
 }
-#-------------------------------------------------------------------------------
-#OUTPUT
+
+#--- Output --------------------------------------------------------------------
 writeLines(md_content,here("04_documentation", "chch_summary.md"))
-
-

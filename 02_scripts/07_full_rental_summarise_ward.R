@@ -1,21 +1,16 @@
-#-------------------------------------------------------------------------------
-# Group rental/airbnb summary by ward.
-
+#--- Group rental/airbnb summary by ward ---------------------------------------
+# Load Libraries
 library(tidyverse)
 library(here)
+source(here("02_scripts", "00_tools", "config.R"))
+cfg <- get_config()
 
-#-------------------------------------------------------------------------------
-# 1. set paths ------------------------------------------------------------
-
-summary_file      <- here("03_output", "full_rental_summary_withpricediff.csv")
-ward_source_file  <- here("01_data", "geographic-areas-table-2023.csv")
-
-lookup_output       <- here("03_output", "full_rental_sa_to_ward_lookup.csv")
-withward_output      <- here("03_output", "full_rental_summary_withward.csv")
+#--- Load Data -----------------------------------------------------------------
+summary_file <- here("03_output", "full_rental_summary_bylocation.csv")
+ward_source_file <- here("01_data", "geographic-areas-table-2023.csv")
+lookup_output <- here("03_output", "full_rental_sa_to_ward_lookup.csv")
+withward_output <- here("03_output", "full_rental_summary_withward.csv")
 ward_summary_output <- here("03_output", "full_rental_summary_byward.csv")
-
-
-# 2. load data --------------------------------------------------------------
 
 full_summary <- read_csv(
   summary_file,
@@ -28,9 +23,8 @@ ward_source <- read_csv(
   col_types = cols(.default = col_character())
 )
 
-
-# 3. build an SA -> ward lookup, Christchurch only ----------------------------
-
+#--- Ward Lookup ---------------------------------------------------------------
+# Build an SA
 ward_counts <- ward_source |>
   filter(TA2023_name == "Christchurch City") |>
   count(SA22023_code, WARD2023_code, WARD2023_name, name = "meshblock_count")
@@ -44,14 +38,12 @@ sa2_ward_lookup <- ward_counts |>
     by = "SA22023_code"
   )
 
-
 sum(sa2_ward_lookup$n_wards_touched > 1)
 
 write_csv(sa2_ward_lookup, lookup_output)
 
-
-# 4. attach ward to the SA2 level summary -------------------------------------
-
+#--- Attach Ward ---------------------------------------------------------------
+# Attach to SA2
 full_summary_ward <- full_summary |>
   left_join(
     sa2_ward_lookup |>
@@ -64,9 +56,7 @@ sum(is.na(full_summary_ward$WARD2023_name))
 
 write_csv(full_summary_ward, withward_output)
 
-
-# 5. group by ward ------------------------------------------------------------
-
+#--- Group by Ward -------------------------------------------------------------
 ward_summary <- full_summary_ward |>
   group_by(WARD2023_name) |>
   summarise(
@@ -81,12 +71,8 @@ ward_summary <- full_summary_ward |>
 
 print(ward_summary, n = Inf)
 
-
-# 6. save ----------------------------------------------------------------------
-
+#--- Output --------------------------------------------------------------------
 write_csv(ward_summary, ward_summary_output)
 
 cat("\nSaved ward-level summary to:\n", ward_summary_output, "\n")
-
-str(ward_summary
-  )
+str(ward_summary)

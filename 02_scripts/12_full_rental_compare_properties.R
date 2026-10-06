@@ -1,20 +1,18 @@
-#-------------------------------------------------------------------------------
-#compare the number of beds per location airbnb vs tenancy
-
+#--- Compare Full Data Set -----------------------------------------------------
+# Compare the number of beds per location airbnb vs tenancy
+#
+# Load Libraries
 library(tidyverse)
 library(here)
+source(here("02_scripts", "00_tools", "config.R"))
+cfg <- get_config()
 
-
-
-# set paths---------------------------------------------------------------------
-
+#--- Load Data -----------------------------------------------------------------
 airbnb_file <- here("03_output","airbnb_chch_cleaned_witharea.csv")
 
 bond_file <- here("03_output","tenancy_chch_cleaned.csv")
-area_lookup_file <- here("0_output", "area_code_lookup.csv")
+area_lookup_file <- here("03_output", "area_code_lookup.csv")
 output_file <- here("03_output","airbnb_rental_properties_count_by_location.csv")
-
-#LOAD DATA----------------------------------------------------------------------
 
 airbnb <- read_csv(
   airbnb_file,
@@ -39,12 +37,16 @@ area_lookup <- read_csv(
   )
 )
 
+#--- Calculate comparison ------------------------------------------------------
+# latest Airbnb snapshot, and latest tenancy quarter in the (windowed) bond data
+latest_month   <- latest_airbnb_month()
+latest_quarter <- max(bond$TimeFrame)
+message("Comparing Airbnb ", latest_month, " with tenancy quarter ", latest_quarter)
 
-# 5. count Airbnb listings by SA2 ---------------------------------------
-
+#--- Count Airbnb Listings by SA2 Code -----------------------------------------
 airbnb_count <- airbnb |>
   filter(
-    year_month == "2026_06"  # use the latest: 2026-06
+    year_month == latest_month
   ) |>
   group_by(
     SA22026_code
@@ -54,22 +56,19 @@ airbnb_count <- airbnb |>
     .groups = "drop"
   )
 
-
-# 6. get rental bond count by SA2 ----------------------------------
-
+#--- Get rental bond count by SA2 ----------------------------------------------
 rental_count <- bond |>
   filter(
-    TimeFrame == "2026-04-01",   # use the latest: 2026-04-01
-    `Dwelling Type` == "ALL",    # only use ALL type 
-    `Number Of Beds` == "ALL"    # only use ALL type
+    TimeFrame == latest_quarter, # the latest quarter
+    `Dwelling Type` == cfg$dwelling_type, # summary rows (set in config.yaml)
+    `Number Of Beds` == cfg$number_of_beds
   ) |>
   transmute(
     SA22026_code = `Location Id`,
-    rental_count = `Active Bonds`    # use active bond, not total
+    rental_count = `Active Bonds`
   )
 
-
-# 7. join the two summary tables ----------------------------------------
+#--- Join the two summary tables -----------------------------------------------
 
 location_counts <- full_join(
   airbnb_count,
@@ -77,9 +76,7 @@ location_counts <- full_join(
   by = "SA22026_code"
 )
 
-
-# 8. replace missing counts with 0 --------------------------------------
-
+#--- Replace missing counts with 0 ---------------------------------------------
 location_counts <- location_counts |>
   mutate(
     airbnb_count = replace_na(airbnb_count, 0),
@@ -87,8 +84,7 @@ location_counts <- location_counts |>
   )
 
 
-# 9. calculate difference ------------------------------------------------
-
+#--- Calculate differences -----------------------------------------------------
 location_counts <- location_counts |>
   mutate(
     count_difference = airbnb_count - rental_count
@@ -96,8 +92,7 @@ location_counts <- location_counts |>
 
 names(area_lookup)
 
-# 10. add area name and sort result --------------------------------------
-
+#--- Add area name and sort results --------------------------------------------
 location_counts <- location_counts |>
   left_join(
     area_lookup |>
@@ -114,14 +109,7 @@ location_counts <- location_counts |>
   ) |>
   arrange(SA22026_code)
 
-
-# 11. inspect results ----------------------------------------------------
-
-print(location_counts)
-
-
-# 12. summary checks -----------------------------------------------------
-
+#--- Checks --------------------------------------------------------------------
 cat(
   "\nNumber of SA2 areas:",
   nrow(location_counts),
@@ -141,8 +129,7 @@ cat(
 )
 
 
-# 13. save results -------------------------------------------------------
-
+#--- Output --------------------------------------------------------------------
 write_csv(
   location_counts,
   output_file
@@ -153,19 +140,3 @@ cat(
   output_file,
   "\n"
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

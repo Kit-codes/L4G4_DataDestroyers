@@ -1,0 +1,22 @@
+# Settings that control the analysis. Edit here, not in the scripts.
+# Every script that uses a setting reads it from this file, and the Makefile
+# re-runs those scripts when this file changes.
+
+# Council area to analyse. Must match the Airbnb `neighbourhood_group` and the
+# Stats NZ `TA2023_name`
+area: "Christchurch City"
+
+# Koordinates layer used to find each listing's SA2 (Statistical Area 2 2026).
+koordinates_layer_id: "123515"
+
+# Tenancy rows to keep, the summary rows that cover all dwelling types / bedrooms.
+dwelling_type: "ALL"
+number_of_beds: "ALL"
+
+# SA2 whose median Airbnb price is reported by script 10.
+central_sa2_name: "Christchurch Central"
+
+# Date the latest Airbnb snapshot was collected (YYYY-MM-DD, in quotes).
+# The listings files don't contain it. 
+#Leave as null to use the last day of the latest month.
+collection_date: null
