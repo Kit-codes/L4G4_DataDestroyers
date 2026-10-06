@@ -41,9 +41,7 @@ p_ward_prices <- ggplot(ward_prices_long, aes(x = price, y = WARD2023_name, colo
     title   = "Airbnb vs rental price per night, by ward",
     x       = "Price per night (NZD)",
     y       = "Ward",
-    caption = if (length(no_rent_wards) > 0)
-      paste("Not shown (no rental bond data):", paste(no_rent_wards, collapse = ", "))
-  )
+    )
 save_plot(p_ward_prices, "13_ward_price_airbnb_vs_rental")
 
 #--- Each SA2 area: Airbnb vs rental nightly price -----------------------------
@@ -56,7 +54,6 @@ p_sa2_prices <- ggplot(sa2_prices, aes(x = rent_per_night, y = median_Airbnb_pri
   geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
   labs(
     title    = "Airbnb vs rental price per night, by SA2 area",
-    subtitle = "Dashed line: both prices equal",
     x        = "Rental price per night (NZD)",
     y        = "Airbnb price per night (NZD)"
   )

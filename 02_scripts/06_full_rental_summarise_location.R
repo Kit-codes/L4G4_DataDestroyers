@@ -1,10 +1,13 @@
 #--- Summary of Airbnb Data by Location ----------------------------------------
 # Filter tenancy for summary rows
 # Join the summary tables 
+#
 # Load libraries
 library(tidyverse)
 library(dplyr)
 library(here)
+source(here("02_scripts", "00_tools", "config.R"))
+cfg <- get_config()
 
 #--- Load Data -----------------------------------------------------------------
 airbnb_full <- read_csv(here("03_output","airbnb_chch_cleaned_witharea.csv"))
@@ -24,20 +27,20 @@ check <- sum(as.numeric(airbnb_summary$Number_of_Airbnb_properties))== nrow(airb
 check
 
 # Append the area codes corresponding suburb name
-airbnb_summary <- left_join(airbnb_summary, area_codes|> select(SA22026_code,
-                                                                SA22026_name))
+airbnb_summary <- left_join(airbnb_summary,
+                            area_codes|> select(SA22026_code,SA22026_name))
 
 #--- Filter Rental Data --------------------------------------------------------
 # Filter for ALL, ALL dwelling type and beds = summary rows
 rental_filtered <- rental_full |> 
-                        filter(`Dwelling Type` == "ALL",
-                               `Number Of Beds` == "ALL")
+  filter(`Dwelling Type` == cfg$dwelling_type,
+         `Number Of Beds` == cfg$number_of_beds)
 
 #--- Create Summary Statistics -------------------------------------------------
 rental_summary <- rental_filtered |>
-                    group_by(`Location Id`) |>
-                              summarise(Median_rent = median(`Median Rent`),
-                                        Number_of_rental_bonds = max(`Total Bonds`))
+  group_by(`Location Id`) |>
+  summarise(Median_rent = median(`Median Rent`),
+            Number_of_rental_bonds = max(`Total Bonds`))
 
 #--- Join summarised tables together -------------------------------------------
 full_summary <- full_join(airbnb_summary, rental_summary, 

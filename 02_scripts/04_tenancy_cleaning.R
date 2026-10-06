@@ -71,9 +71,3 @@ The cleaned data was saved as `rental_bond_clean.csv`.
 )
 
 writeLines(log_text, here("04_documentation", "rental_bond_cleaning_log.md"))
-
-
-
-
-
-

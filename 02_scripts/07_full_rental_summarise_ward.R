@@ -2,6 +2,8 @@
 # Load Libraries
 library(tidyverse)
 library(here)
+source(here("02_scripts", "00_tools", "config.R"))
+cfg <- get_config()
 
 #--- Load Data -----------------------------------------------------------------
 summary_file <- here("03_output", "full_rental_summary_bylocation.csv")

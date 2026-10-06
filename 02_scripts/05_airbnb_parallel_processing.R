@@ -14,8 +14,8 @@ library(here)
 source(here("02_scripts", "00_tools", "config.R"))   # must provide get_api_key()
 
 #--- Koordinates Layer Id ------------------------------------------------------
-# Statistical Area 2 2026
-layer_id <- "123515"
+# Statistical Area 2 2026 (set in config.yaml)
+layer_id <- get_config()$koordinates_layer_id
 
 #--- Load Data -----------------------------------------------------------------
 input_file  <- here("03_output","airbnb_chch_cleaned.csv")

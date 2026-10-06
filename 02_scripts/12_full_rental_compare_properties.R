@@ -4,12 +4,14 @@
 # Load Libraries
 library(tidyverse)
 library(here)
+source(here("02_scripts", "00_tools", "config.R"))
+cfg <- get_config()
 
 #--- Load Data -----------------------------------------------------------------
 airbnb_file <- here("03_output","airbnb_chch_cleaned_witharea.csv")
 
 bond_file <- here("03_output","tenancy_chch_cleaned.csv")
-area_lookup_file <- here("0_output", "area_code_lookup.csv")
+area_lookup_file <- here("03_output", "area_code_lookup.csv")
 output_file <- here("03_output","airbnb_rental_properties_count_by_location.csv")
 
 airbnb <- read_csv(
@@ -35,10 +37,16 @@ area_lookup <- read_csv(
   )
 )
 
+#--- Calculate comparison ------------------------------------------------------
+# latest Airbnb snapshot, and latest tenancy quarter in the (windowed) bond data
+latest_month   <- latest_airbnb_month()
+latest_quarter <- max(bond$TimeFrame)
+message("Comparing Airbnb ", latest_month, " with tenancy quarter ", latest_quarter)
+
 #--- Count Airbnb Listings by SA2 Code -----------------------------------------
 airbnb_count <- airbnb |>
   filter(
-    year_month == "2026_06"  # use the latest: 2026-06
+    year_month == latest_month
   ) |>
   group_by(
     SA22026_code
@@ -51,17 +59,16 @@ airbnb_count <- airbnb |>
 #--- Get rental bond count by SA2 ----------------------------------------------
 rental_count <- bond |>
   filter(
-    TimeFrame == "2026-04-01",   # use the latest: 2026-04-01
-    `Dwelling Type` == "ALL",    # only use ALL type 
-    `Number Of Beds` == "ALL"    # only use ALL type
+    TimeFrame == latest_quarter, # the latest quarter
+    `Dwelling Type` == cfg$dwelling_type, # summary rows (set in config.yaml)
+    `Number Of Beds` == cfg$number_of_beds
   ) |>
   transmute(
     SA22026_code = `Location Id`,
-    rental_count = `Active Bonds`    # use active bond, not total
+    rental_count = `Active Bonds`
   )
 
-
-# 7. join the two summary tables ----------------------------------------
+#--- Join the two summary tables -----------------------------------------------
 
 location_counts <- full_join(
   airbnb_count,
@@ -133,19 +140,3 @@ cat(
   output_file,
   "\n"
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

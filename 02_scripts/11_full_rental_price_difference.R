@@ -14,10 +14,10 @@ full_summary <- read.csv(here("03_output","full_rental_summary_bylocation.csv"))
 # Add a per night price for tenancy to df
 full_summary$median_rent_per_night <- full_summary$Median_rent/7
 
-# Calculate the difference in price between airbnb and tenancy
+# Calculate the difference in price between Airbnb and tenancy
 full_summary$price_diff_per_night <- abs(full_summary$median_Airbnb_price - full_summary$median_rent_per_night)
 
-# Find the row with the largest diffeence in price
+# Find the row with the largest difference in price
 max_price_diff<- full_summary |> 
                     slice_max(price_diff_per_night, n = 1)
 max_price_diff

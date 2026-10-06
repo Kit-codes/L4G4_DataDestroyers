@@ -3,6 +3,7 @@ library(tidyverse)
 library(here)
 source(here("02_scripts", "00_tools", "config.R"))
 source(here("02_scripts","00_tools","topPercent.R"))
+cfg <- get_config()
 
 #--- Load Data -----------------------------------------------------------------
 nz_data <- read_csv(here("03_output", "airbnb_nz_preprocessed.csv"))
@@ -23,7 +24,7 @@ p_price_chch <- ggplot(chch_data, aes(x = price)) +
   geom_histogram(binwidth = 10) +
   coord_cartesian(xlim = c(0, 2000)) + # 0-2000 span
   labs(
-    title = "Distribution of Airbnb Prices in Christchurch City",
+    title = paste("Distribution of Airbnb Prices in", cfg$area),
     x = "Price",
     y = "Count"
   )
@@ -35,7 +36,7 @@ price_comparison <- bind_rows(
     mutate(area = "All New Zealand"),
   
   chch_data|>
-    mutate(area = "Christchurch City")
+    mutate(area = cfg$area)
 )
 
 p_price_comparison <- ggplot(
@@ -54,7 +55,7 @@ p_price_comparison <- ggplot(
     xlim = c(0, 1000)
   ) +
   labs(
-    title = "Airbnb Price Distribution: New Zealand vs Christchurch City",
+    title = paste("Airbnb Price Distribution: New Zealand vs", cfg$area),
     x = "Price (NZD)",
     y = "Count",
     fill = "Area"
@@ -79,7 +80,7 @@ p_days_since_review <- ggplot(
   chch_data,
   aes(x = days_since_last_review)
 ) +
-  coord_cartesian(xlim = c(-10, 1000)) + # 0-1000 span
+  coord_cartesian(xlim = c(-10, 1000)) +
   geom_histogram(
     binwidth = 5,
     na.rm = TRUE
@@ -91,14 +92,14 @@ p_days_since_review <- ggplot(
   )
 save_plot(p_days_since_review, "09_days_since_last_review")
 
-#--- calculate top 10% number of reviews ---------------------------------------
+#--- Calculate top 10% number of reviews ---------------------------------------
 top_10_reviews <- topPercent(nz_data, nz_data$number_of_reviews, 0.1 )
 
 top_10_reviews |>
   summarise(
     total_top_10 = n(),
     christchurch_count = sum(
-      neighbourhood_group == "Christchurch City",
+      neighbourhood_group == cfg$area,
       na.rm = TRUE
     )
   )
