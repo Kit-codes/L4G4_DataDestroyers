@@ -6,7 +6,7 @@ library(tidyverse)
 library(here)
 #------------------------------------------------------------------------------
 #LOAD DATA
-airbnb_chch_raw <- read_csv(here("3_output", "airbnb_chch_preprocessed.csv"))
+airbnb_chch_raw <- read_csv(here("03_output", "airbnb_chch_preprocessed.csv"))
 
 n_start <- nrow(airbnb_chch_raw)
 
@@ -55,7 +55,7 @@ n_price_dropped <- n_before_price - n_after_price
 str(airbnb_chch_clean)
 #-------------------------------------------------------------------------------
 #OUPUT
-write_csv(airbnb_chch_clean, here("3_output","airbnb_chch_cleaned.csv"))
+write_csv(airbnb_chch_clean, here("03_output","airbnb_chch_cleaned.csv"))
 
 
 #-------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ were not observed in the original listings.
 "
 )
 
-writeLines(log_text,here("4_documentation","chch_cleaning_log.md"))
+writeLines(log_text,here("04_documentation","chch_cleaning_log.md"))
 
 
 

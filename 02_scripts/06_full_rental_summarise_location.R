@@ -9,9 +9,9 @@ library(here)
 #-------------------------------------------------------------------------------
 #LOAD
 
-airbnb_full <- read_csv(here("3_output","airbnb_chch_cleaned_witharea.csv"))
-rental_full <- read_csv(here("3_output","tenancy_chch_cleaned.csv"))
-area_codes <- read_csv(here("1_data","geographic_area_table_2026_chch.csv"))
+airbnb_full <- read_csv(here("03_output","airbnb_chch_cleaned_witharea.csv"))
+rental_full <- read_csv(here("03_output","tenancy_chch_cleaned.csv"))
+area_codes <- read_csv(here("01_data","geographic_area_table_2026_chch.csv"))
 
 #-------------------------------------------------------------------------------
 #summarise airbnb data based on loacation 
@@ -48,7 +48,7 @@ str(full_summary)
 
 #-------------------------------------------------------------------------------
 #OUTPUT
-write_csv(full_summary, here("3_output","full_rental_summary_bylocation.csv"))
+write_csv(full_summary, here("03_output","full_rental_summary_bylocation.csv"))
 
 
 

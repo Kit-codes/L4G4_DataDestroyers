@@ -5,7 +5,7 @@ library(tidyverse)
 library(here)
 library(dplyr)
 #-------------------------------------------------------------------------------------------------------
-full_summary <- read.csv(here("3_output","full_rental_summary_bylocation.csv"))
+full_summary <- read.csv(here("03_output","full_rental_summary_bylocation.csv"))
 
 
 #add a per night price for tenancy to df
@@ -21,5 +21,5 @@ max_price_diff<- full_summary |>
 
 max_price_diff
 
-write_csv(full_summary, here("3_output","full_rental_summary_withpricediff.csv"))
+write_csv(full_summary, here("03_output","full_rental_summary_withpricediff.csv"))
 
