@@ -1,30 +1,30 @@
-#------------------------------------------------------------------------------- 
-# Tenancy Data Pre Processing
+#--- Tenancy Data Pre Processing -----------------------------------------------
 # Date: 16/9/2026
-
+# Load libraries
 library(tidyverse)
 library(here)
-#-------------------------------------------------------------------------------
-#LOAD DATA
-# 1. read tenancy data file
+source(here("02_scripts", "00_tools", "config.R"))
+
+#--- Load Data -----------------------------------------------------------------
+# Read tenancy data file
 tenancy_data_full <- read_csv(here("01_data","Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv"))
 chch_areas <- read_csv(here("01_data", "geographic_area_table_2026_chch.csv"))
-#-------------------------------------------------------------------------------
-# filter dataset to only include dates from 01 October 2025 to 30 June 2026
-tenancy_data_current <- tenancy_data_full |>
-                  filter(between(TimeFrame,as.Date("2025-10-01"), as.Date("2026-06-30")))
-      
 
-#
+#--- Filter Dataset ------------------------------------------------------------
+# Data is filtered to only cover period available in the Airbnb months in 
+# 01_data/01_airbnb_rawdata (first day of the earliest month to last day of the 
+# latest month)
+window_start <- month_start(earliest_airbnb_month())
+window_end   <- month_end(latest_airbnb_month())
+message("Tenancy window: ", window_start, " to ", window_end)
+tenancy_data_current <- tenancy_data_full |>
+  filter(between(TimeFrame, window_start, window_end))
+
 tenancy_data_chch <- tenancy_data_current |>
   filter(
     `Location Id` %in% chch_areas$SA22026_code
   )
 
-
-
-
-#-------------------------------------------------------------------------------
-#OUTPUT
+#--- Output --------------------------------------------------------------------
 write_csv(tenancy_data_current, here("03_output","tenancy_nz_preprocessed.csv"))
 write_csv(tenancy_data_chch, here("03_output","tenancy_chch_preprocessed.csv"))

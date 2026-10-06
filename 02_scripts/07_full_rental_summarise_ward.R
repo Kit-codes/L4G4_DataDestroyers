@@ -1,5 +1,5 @@
-#-------------------------------------------------------------------------------
-# Group rental/airbnb summary by ward.
+#--- Group Rental/Airbnb Summary by Ward ---------------------------------------
+
 
 library(tidyverse)
 library(here)

@@ -1,17 +1,14 @@
-#-------------------------------------------------------------------------------
-#AirBnB Christchurch Data Cleaning
-
-
+#--- AirBnB Christchurch Data Cleaning -----------------------------------------
+# Load libraries
 library(tidyverse)
 library(here)
-#------------------------------------------------------------------------------
-#LOAD DATA
-airbnb_chch_raw <- read_csv(here("03_output", "airbnb_chch_preprocessed.csv"))
 
+#--- Load Data -----------------------------------------------------------------
+airbnb_chch_raw <- read_csv(here("03_output", "airbnb_chch_preprocessed.csv"))
 n_start <- nrow(airbnb_chch_raw)
 
-#------------------------------------------------------------------------------
-#Cleaning step - remove columns
+#--- Cleaning step -------------------------------------------------------------
+# remove columns
 
 # license: 
 #   100% missing in this data set: zero information, drop entirely
@@ -33,8 +30,8 @@ dropped_cols <- c(
 airbnb_chch_clean <- airbnb_chch_raw|>
                         select(-any_of(dropped_cols))
 
-#-------------------------------------------------------------------------------
-# Cleaning Step - Handle missing prices 
+#--- Cleaning Step -------------------------------------------------------------
+# Handle missing prices 
 
 # price is important to next week's rent comparison with the bond dataset,so rows 
 # with no price are not usable for that purpose. We drop them rather than impute, 
@@ -50,16 +47,13 @@ airbnb_chch_clean <- airbnb_chch_clean |>
 n_after_price <- nrow(airbnb_chch_clean)
 n_price_dropped <- n_before_price - n_after_price
 
-#-------------------------------------------------------------------------------
-#check
+#--- Check ---------------------------------------------------------------------
 str(airbnb_chch_clean)
-#-------------------------------------------------------------------------------
-#OUPUT
+
+#--- Output --------------------------------------------------------------------
 write_csv(airbnb_chch_clean, here("03_output","airbnb_chch_cleaned.csv"))
 
-
-#-------------------------------------------------------------------------------
-#CLEANING LOG
+#--- Cleaning Log --------------------------------------------------------------
 log_text <- glue::glue(
   "
 # Christchurch Listings - Cleaning Log
