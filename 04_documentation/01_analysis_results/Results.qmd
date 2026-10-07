@@ -1,0 +1,72 @@
+---
+title: "Results"
+
+author: L4G4 Data Destroyers
+date: today
+date-format: "DD-MM-YYYY"
+
+format: 
+  typst:
+    mainfont: "Calibri"
+    fontsize: 11pt
+    
+project:
+  execute-dir: project 
+  
+editor: visual
+---
+
+{{< pagebreak >}}
+
+## Analysis Results
+
+```{r}
+#| label: load libraries
+#| include: false
+
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(knitr)
+
+```
+
+### AirBnB Price Distribution Plots
+
+![](images/09_price_distribution_chch.png){fig-align="center" width="500"}
+
+![](images/09_price_distribution_nz_vs_chch.png){fig-align="center" width="500"}
+
+### AirBnB - Days Since Last Review
+
+![](images/09_days_since_last_review-01.png){fig-align="center"}
+
+### AirBnB Top 10% of Reviews
+
+TBD
+
+### AirBnB Median Price Christchurch central
+
+```{r}
+#| label: median price chch central
+#| echo: false
+
+median_price_chch_central <- read_csv(here("03_output","airbnb_median_price_chch_central.csv" ),show_col_types = FALSE)
+
+knitr::kable(median_price_chch_central, format = "markdown")
+```
+
+{{< pagebreak >}}
+
+### Short and Long Term Rental Maximum Price Difference  
+
+![](images/13_sa2_price_airbnb_vs_rental-01.png)
+
+![](images/13_ward_price_airbnb_vs_rental.png)
+
+ADD IN EXTRACTED ROW FOR
+
+### Short and Long Term Rental Number of Beds By Location  
+
+![](images/13_ward_counts_airbnb_vs_rental.png)
