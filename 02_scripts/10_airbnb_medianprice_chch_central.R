@@ -1,6 +1,12 @@
-#--- Join ----------------------------------------------------------------------
-# Median price for Chistchurch central Airbnb properties
-# Load Libraries
+#--- Price Difference Between Tenancy and Airbnb -------------------------------------------------------
+#Description: Finds the median Airbnb price for Christchurch central suburb 
+
+
+# Inputs: full_rental_summary_bylocation.csv - csv file containing aribnb and tenancy data by location (suburb level)
+#         
+# Outputs: airbnb_median_price_chch_central.csv - csv file containing the suburb name and median 
+
+#--- Load libraries ------------------------------------------------------------
 library(tidyverse)
 library(dplyr)
 library(here)

@@ -1,8 +1,13 @@
-#--- Price Difference in Full Data Set -----------------------------------------
-# Find the location with the  maximum difference in price per night between 
-# Airbnb and long term rentals
-#
-# Load Libraries
+#--- Price Difference Between Tenancy and Airbnb -------------------------------
+#Description: Calculates the price difference between long term and short term rentals for Christchurch locations, by suburb
+
+
+# Inputs: full_rental_summary_bylocation.csv - csv file containing aribnb and tenancy data by location (suburb level)
+#         
+
+# Outputs: full_rental_summary_withpricediff.csv - csv file containing the full rental summary with price difference column
+
+#--- Load libraries ------------------------------------------------------------
 library(tidyverse)
 library(here)
 library(dplyr)
