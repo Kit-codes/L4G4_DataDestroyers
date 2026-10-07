@@ -11,7 +11,6 @@
 #Outputs: airbnb_nz_preprocessed.csv - csv file containing AirBnB listings data for all of New Zealand
 #         airbnb_chch_preprocessed.csv - csv file containing AirBnB listings data for Christchurch City
 
-
 #---Load Libraries -------------------------------------------------------------
 library(tidyverse)
 library(here)
