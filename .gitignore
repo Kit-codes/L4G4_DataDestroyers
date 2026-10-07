@@ -24,6 +24,7 @@ desktop.ini
 *.utf8.md
 *.knit.md
 
-# Data files 
-*.csv
-*.csv.gz
+#untracked folders - output  
+03_output/
+01_plots/
+z_bin/
