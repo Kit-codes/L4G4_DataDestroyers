@@ -48,7 +48,7 @@ Run the scripts in `2_scripts/` in numeric order:
 
 Shared helper functions used by the scripts above live in `2_scripts/0_tools/`.
 
-## AirBnB Data Set:
+## Airbnb Dataset:
 
 | Column Name | Data Type | Description |
 |---|---|---|
@@ -72,11 +72,14 @@ Shared helper functions used by the scripts above live in `2_scripts/0_tools/`.
 | `license` | Text | License, permit, or registration number (if applicable under local council regulations) |
 
 
+### Source and Licence:
+Sourced from Inside Airbnb.
 
-### Source:
-Sourced from Inside AirBnB
-https://insideairbnb.com/get-the-data/ - New Zealand
+**Licence:** Creative Commons Attribution 4.0 International (CC BY 4.0).
 
+**Attribution:** Inside Airbnb / Murray Cox.
+
+https://insideairbnb.com/get-the-data/
 
 ### Note:
 #### Room Type Categories
@@ -113,7 +116,7 @@ Otherwise:
 
 ___
 
-## Bond Data Set:
+## Bond Dataset:
 
 | Column Name | Data Type | Description |
 |---|---|---|
@@ -130,11 +133,17 @@ ___
 | `Lower Quartile Rent` | Currency | Weekly rent at the lower quartile |
 | `Log Std Dev Weekly Rent` | Numeric | Measure of variation in weekly rent |
 
-### Bond Data Source:
+### Bond Data Source and Licence:
 
-Sourced from Tenancy Services – Rental Bond Data
+Sourced from Tenancy Services – Ministry of Business, Innovation and Employment (MBIE).
 
-Dataset: Detailed Quarterly Report, Q1 2020 – Q3 2026
+**Licence:** Creative Commons Attribution 3.0 New Zealand (CC BY 3.0 NZ).
+
+**Attribution:** Ministry of Business, Innovation and Employment (MBIE).
+
+Dataset: Detailed Quarterly Report, Q1 2020 – Q3 2026.
+
+https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/
 
 [Tenancy Services – Rental Bond Data](https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/)
 ('The Ministry of Business, Innovation and Employment') 
@@ -146,20 +155,26 @@ The dataset contains quarterly rental bond information for different locations, 
 
 ## Area Code Data (Koordinates)
 
-__Dataset:__  Statistical Area 2 2026  
-__Description:__   definitive version of statistical area 2 (SA2) boundaries as at 1 January 2026, as defined by Stats NZ. This version contains 2,311 SA2s (excluding the 16 with empty or null geometries (non-digitised)).  
-__Layer ID:__  123515  
-__Link:__  https://koordinates.com/from/datafinder.stats.govt.nz/layer/123515-statistical-area-2-2026/  
-__Created by:__ Geospatial and Data Acquisition Team, Stats NZ (Stats NZ – Tatauranga Aotearoa)  
+__Dataset:__ Statistical Area 2 2026  
+__Description:__ Definitive version of Statistical Area 2 (SA2) boundaries as at 1 January 2026, as defined by Stats NZ. This version contains 2,311 SA2s, excluding the 16 SA2s with empty or null geometries (non-digitised).  
+__Layer ID:__ 123515  
+__Link:__ https://koordinates.com/from/datafinder.stats.govt.nz/layer/123515-statistical-area-2-2026/  
+__Source / Data Owner:__ Stats NZ – Tatauranga Aotearoa  
+__Created by:__ Geospatial and Data Acquisition Team, Stats NZ  
+__Licence:__ Creative Commons Attribution 4.0 International (CC BY 4.0)  
+__Attribution:__ Stats NZ – Tatauranga Aotearoa
+__Accessed via:__ Stats NZ Geographic Data Service / Koordinates
 
-___
-
+ 
 ## Ward / Geographic Areas Data
 
 __Dataset:__ Geographic Areas Table 2023 (meshblock-level concordance)  
 __Description:__ Stats NZ table mapping every 2023 meshblock to its SA1, SA2, ward, territorial authority and other geographic classifications. Used in `12_full_rental_grouping.R` to attach a ward to each SA2 area code, filtered to `TA2023_name == "Christchurch City"`.  
-__File:__ `1_data/geographic-areas-table-2023.csv`  
-__Source:__ Stats NZ – Tatauranga Aotearoa, via [datafinder.stats.govt.nz](https://datafinder.stats.govt.nz/)  
+__Source / Data Owner:__ Stats NZ – Tatauranga Aotearoa  
+__Licence:__ Creative Commons Attribution 4.0 International (CC BY 4.0)  
+__Attribution:__ Stats NZ – Tatauranga Aotearoa  
+__Accessed via:__ Stats NZ Geographic Data Service / Datafinder  
+__File:__ `1_data/geographic-areas-table-2023.csv`
 
 __Notes:__
 - SA2 codes matched exactly between the 2026 SA2 boundaries (used for the Airbnb area codes) and this 2023-vintage table, for all 179 Christchurch SA2 areas.
