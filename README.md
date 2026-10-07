@@ -11,11 +11,13 @@ can be compared and summarised side by side, down to SA2 and ward level.
 
 ## Installation:
 
-1. Clone the repository and open `L4G4_DataDestroyers.Rproj` in RStudio.
+1. Clone the repository in RStudio.
 2. Run `renv::restore()` to install the exact package versions the project was built with (see `renv.lock`).
 3. Get a free Koordinates account and API key at (https://koordinates.com) needed for `2_scripts/7_airbnb_parallel_processing.R` (see **Area Code Data** below).
-   Paste your key into the `api_key` variable at the top of that script, **or**, preferably, set `KOORDINATES_API_KEY=your_key_here` in a local `.Renviron` file 
-   (already gitignored, never commit the API key) and read it in the script with `Sys.getenv("KOORDINATES_API_KEY")`.
+4. Create a .Renviron file by creating a new file and renaming it .Renviron
+5. Copy and paste "KOORDINATES_API_KEY=" into the file, then follow up by copying and pasting the API key you got from your Koordinates account.
+6. In the R console type ```source("pipeline.R")```
+7. Then follow by typing ```run_pipeline()```
 
 ## Project Structure:
 
