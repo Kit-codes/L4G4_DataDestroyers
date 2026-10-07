@@ -1,5 +1,17 @@
 #--- AirBnB Christchurch Data Cleaning -----------------------------------------
-# Load libraries
+
+# Description: takes preprocessed Airbnb listings data for Christchurch City,
+#              removes columns that are unnecessary for analysis
+#              handles missing prices 
+#              writes cleaned data to csv
+#              writes cleaning log and outcomes to rmarkdown file
+
+# Inputs: airbnb_chch_preprocessed.csv - csv file containing pre processed airbnb listings data
+
+# Outputs: airbnb_chch_cleaned.csv - csv file containing cleaned airbnb listings data
+#          chch_cleaning_log.md - rmarkdown file containing cleaning log and outcomes
+
+#--- Load libraries ------------------------------------------------------------
 library(tidyverse)
 library(here)
 
@@ -7,8 +19,7 @@ library(here)
 airbnb_chch_raw <- read_csv(here("03_output", "airbnb_chch_preprocessed.csv"))
 n_start <- nrow(airbnb_chch_raw)
 
-#--- Cleaning step -------------------------------------------------------------
-# remove columns
+#--- Cleaning step - remove columns --------------------------------------------
 
 # license: 
 #   100% missing in this data set: zero information, drop entirely
@@ -30,8 +41,7 @@ dropped_cols <- c(
 airbnb_chch_clean <- airbnb_chch_raw|>
                         select(-any_of(dropped_cols))
 
-#--- Cleaning Step -------------------------------------------------------------
-# Handle missing prices 
+#--- Cleaning Step - handle missing prices -------------------------------------
 
 # price is important to next week's rent comparison with the bond dataset,so rows 
 # with no price are not usable for that purpose. We drop them rather than impute, 
