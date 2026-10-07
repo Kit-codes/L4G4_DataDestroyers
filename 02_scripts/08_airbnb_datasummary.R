@@ -1,5 +1,14 @@
 #--- AirBnb Data Summary -------------------------------------------------------
-# Load Libraries
+#Description: Creates a statistical summary for the Christchurch Airbnb Data by column - pre-cleaning
+
+
+# Inputs: airbnb_chch_preprocessed.csv - csv file containing preporcessed Airbnb data with area codes
+#         
+
+# Outputs: chch_summary.md - rmarkdown containing statistical summarys by column for Chirsrchurch Airbnb data, preprocessed
+
+
+#--- Load libraries ------------------------------------------------------------
 library(tidyverse)
 library(here)
 source(here("02_scripts","00_tools","data_summary.R"))

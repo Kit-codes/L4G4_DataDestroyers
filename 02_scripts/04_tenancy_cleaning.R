@@ -1,5 +1,16 @@
 #--- Tenancy Christchurch Data Cleaning ----------------------------------------
-# Load libraries
+
+# Description: takes preprocessed tenancy data for Christchurch City
+#              removes columns that are unnecessary for analysis
+#              writes cleaned data to csv
+#              writes cleaning log and outcomes to rmarkdown file
+
+# Inputs: tenancy_chch_preprocessed.csv - csv file containing pre processed tenancy data
+
+# Outputs: tenancy_chch_cleaned.csv - csv file containing cleaned tenancy data
+#          tenancy_cleaning_log.md - rmarkdown file containing cleaning log and outcomes
+
+#--- Load libraries ------------------------------------------------------------
 library(tidyverse)
 library(here)
 

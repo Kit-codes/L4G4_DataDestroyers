@@ -1,4 +1,14 @@
 #--- Group rental/airbnb summary by ward ---------------------------------------
+
+#Description: Creates a summary dataset for airbnb and tenancy data based on location at ward level
+
+
+# Inputs: full_rental_summary_bylocation - csv file containing summary dataset with rental and airbnb data for each location (suburb level)
+#         geographic-areas-table-2023.csv  - datset containing data relating to geographic locations, including area codes, wards
+
+# Outputs: full_rental_summary_withward - csv file containing summary dataset with rental and airbnb data for each location (ward level)
+
+#--- Load libraries ------------------------------------------------------------
 # Load Libraries
 library(tidyverse)
 library(here)

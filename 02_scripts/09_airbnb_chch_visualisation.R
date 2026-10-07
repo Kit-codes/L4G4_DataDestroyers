@@ -1,4 +1,23 @@
-#--- AirBnb ChCh Visualisation -------------------------------------------------
+#--- AirBnb Christchurch Visualisation -----------------------------------------
+#Description: Creates plots for  Airbnb Data - pre-cleaning
+#             1.New Zealand price distribution
+#             2.Christchurch price distribution
+#             3.Price distribution comparison, New Zealand and Christchurch
+#             4.Add days since days since last review column, plot days since last review
+#             5. Calculate top 10 percent of reviews
+
+
+# Inputs: airbnb_chch_preprocessed.csv - csv file containing preprocessed Airbnb data
+#         airbnb_nz_preprocessed.csv - csv file containing preprocessed Airbnb data       
+
+# Outputs: 09_price_distribution_chch.png
+#          09_price_distribution_nz_vs_chch.png
+#          09_price_distribution_nz_vs_chch.png
+#          09_days_since_last_review.png
+
+#--- Load libraries ------------------------------------------------------------
+
+
 library(tidyverse)
 library(here)
 source(here("02_scripts", "00_tools", "config.R"))

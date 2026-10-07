@@ -1,5 +1,17 @@
-# --- AirBnB Data Pre Processing -----------------------------------------------
-# Load libraries
+# --- AirBnB Data Preprocessing ------------------------------------------------
+
+#Description: Takes raw AirBnB listing data files, 
+#             extracts the month and year from file names
+#             reads listings files, adds column with month and year
+#             merges into a single data set for all of  New Zealand
+#             filters on Christchurch City and creates a second Christchurch data set
+
+
+#Inputs: 01_airbnb_rawdata - file folder containing csv files of monthly listings data (loaded via config.R)
+#Outputs: airbnb_nz_preprocessed.csv - csv file containing AirBnB listings data for all of New Zealand
+#         airbnb_chch_preprocessed.csv - csv file containing AirBnB listings data for Christchurch City
+
+#---Load Libraries -------------------------------------------------------------
 library(tidyverse)
 library(here)
 source(here("02_scripts", "00_tools", "config.R"))
@@ -10,13 +22,14 @@ cfg <- get_config()
 airbnb_months <- get_airbnb_months()
 check_month_gaps(airbnb_months$year_month)
 
+
 listings_cols <- c("id", "host_id", "neighbourhood_group", "neighbourhood",
                    "latitude", "longitude", "room_type", "price", "minimum_nights",
                    "number_of_reviews", "last_review", "reviews_per_month",
                    "calculated_host_listings_count", "availability_365",
                    "number_of_reviews_ltm")
 
-#--- Create merged file --------------------------------------------------------
+#--- Create Merged File --------------------------------------------------------
 # Read all New Zealand listings files and add year_month column
 nz_data_all <- map2_dfr(
   airbnb_months$file,

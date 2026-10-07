@@ -1,6 +1,16 @@
-#--- Tenancy Data Pre Processing -----------------------------------------------
-# Date: 16/9/2026
-# Load libraries
+# --- Tenancy Data Preprocessing ------------------------------------------------
+
+#Description: Takes raw tenancy listing data files, 
+#             Filters on dates to match airbnb data - pulled from config.R
+#             filters on Christchurch City and creates a second Christchurch data set
+
+
+#Inputs: Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv - csv file of quarterly tenancy data
+#        geographic_area_table_2026_chch.csv
+#Outputs: tenancy_nz_preprocessed.csv - csv file containing tenancy data for all of New Zealand
+#         tenancy_chch_preprocessed.csv - csv file containing tenancy data for Christchurch City
+
+#---Load Libraries -------------------------------------------------------------
 library(tidyverse)
 library(here)
 source(here("02_scripts", "00_tools", "config.R"))

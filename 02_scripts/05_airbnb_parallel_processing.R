@@ -7,7 +7,12 @@
 # is only needed if there is something new to look up.
 # Key: KOORDINATES_API_KEY in the project's .Renviron (see .Renviron.example).
 #
-#load library
+# Inputs: airbnb_chch_cleaned.csv - csv file containing cleaned airbnb listings data
+#
+# Outputs: airbnb_chch_cleaned_witharea.csv - csv file containing cleaned airbnb listings data with area codes column 
+
+
+#--- Load libraries ------------------------------------------------------------
 library(tidyverse)
 library(httr2)
 library(here)
