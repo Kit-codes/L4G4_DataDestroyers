@@ -1,28 +1,38 @@
+# ---------------------------AirBnB Parallel Processing ------------------------
 
-#-------------------------------------------------------------------------------
-#Get the Stats NZ area code (SA2 2026) for each Airbnb listing
+#Description: Get the Stats NZ area code (SA2 2026) for each Airbnb listing
 # using the Koordinates Query API.
 
 
-#load library-
+#Inputs: airbnb_chch_cleaned.csv - csv file containing cleaned tenancy data for Chirstchurch City
+#        geographic_area_table_2026_chch.csv - 
+#        koordinates API key - must be generated on Koordinates wbsite, for instructions, see README
+
+#Outputs: airbnb_chch_cleaned_witharea.csv - csv file, Airbnb cleaned data with area codes column added 
+#         area_code_lookup.csv - lookup file with Christchurch Area codes to prevent having 
+#                               to requery if its already been done
+        
+
+#------------------------------load libraries-----------------------------------
 
 library(tidyverse)
 library(httr2)
 library(here)
 
-#-------------------------------------------------------------------------------
-# koordinates API key and layer id
+#-------------------------koordinates API key and layer id----------------------
+
 layer_id <- "123515"
 api_key  <- "" # paste api key here
 
-#-------------------------------------------------------------------------------
+#------------------------------file path setup----------------------------------
+
 input_file  <- here("03_output","airbnb_chch_cleaned.csv")
 output_file <- here("03_output","airbnb_chch_cleaned_witharea.csv")
 lookup_file <- here("03_output","area_code_lookup.csv")
 chch_file   <- here("01_data","geographic_area_table_2026_chch.csv")
 
 
-# 3. load data -----------------------------------------------------------
+#----------------------------------INPUT----------------------------------------
 
 # ID read as text
 listings <- read_csv(input_file,
@@ -33,7 +43,7 @@ listings <- listings |>
   mutate(coord_key = sprintf("%.7f,%.7f", latitude, longitude))
 
 
-# 4. functions -----------------------------------------------------------
+#-----------------------------query functions-----------------------------------
 
 # builds the query for one location (x is longitude, y is latitude)
 build_req <- function(lat, lon) {
