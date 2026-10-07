@@ -58,6 +58,16 @@ price_comparison <- bind_rows(
     mutate(area = cfg$area)
 )
 
+# Sanity Check
+if (!isTRUE(
+  nrow(price_comparison) == nrow(nz_data) + nrow(chch_data)
+)) {
+  stop(
+    "09: Combined price plot data has an unexpected row count.",
+    call. = FALSE
+  )
+}
+
 p_price_comparison <- ggplot(
   price_comparison,
   aes(
@@ -94,6 +104,15 @@ chch_data <- chch_data |>
     )
   )
 
+# Sanity Check
+if (any(chch_data$days_since_last_review < 0, na.rm = TRUE)) {
+  stop(
+    "09: A last-review date is later than the collection date. ",
+    "Check the review dates and collection date.",
+    call. = FALSE
+  )
+}
+
 #--- Days Since Last Review Plot ----------------------------------------------------
 p_days_since_review <- ggplot(
   chch_data,
@@ -113,6 +132,16 @@ save_plot(p_days_since_review, "09_days_since_last_review")
 
 #--- Calculate top 10% number of reviews ---------------------------------------
 top_10_reviews <- topPercent(nz_data, nz_data$number_of_reviews, 0.1 )
+
+# Sanity Check
+if (!isTRUE(
+  nrow(top_10_reviews) == floor(nrow(nz_data) * 0.1)
+)) {
+  stop(
+    "09: The top-10-percent selection has an unexpected row count.",
+    call. = FALSE
+  )
+}
 
 top_10_reviews |>
   summarise(

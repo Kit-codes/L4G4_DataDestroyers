@@ -33,12 +33,30 @@ airbnb_summary <- airbnb_full |>
 #--- Sanity Check --------------------------------------------------------------
 # Check there is still the correct number of properties, there should be the 
 # Same amount as the number of rows in the Airbnb dataset.
-check <- sum(as.numeric(airbnb_summary$Number_of_Airbnb_properties))== nrow(airbnb_full)
-check
+total_properties <- sum(
+  as.numeric(airbnb_summary$Number_of_Airbnb_properties)
+)
+
+if (!isTRUE(total_properties == nrow(airbnb_full))) {
+  stop(
+    "06: Summarised Airbnb counts do not match input rows. ",
+    "Check missing area codes or missing summary counts.",
+    call. = FALSE
+  )
+}
 
 # Append the area codes corresponding suburb name
+n_before_area_join <- nrow(airbnb_summary)
+
 airbnb_summary <- left_join(airbnb_summary,
                             area_codes|> select(SA22026_code,SA22026_name))
+
+if (!isTRUE(nrow(airbnb_summary) == n_before_area_join)) {
+  stop(
+    "06: Adding area names changed the number of summary rows.",
+    call. = FALSE
+  )
+}
 
 #--- Filter Rental Data --------------------------------------------------------
 # Filter for ALL, ALL dwelling type and beds = summary rows
@@ -56,6 +74,14 @@ rental_summary <- rental_filtered |>
 full_summary <- left_join(airbnb_summary, rental_summary, 
                           by = join_by(SA22026_code==`Location Id`) )
 str(full_summary)
+
+#--- Sanity Check --------------------------------------------------------------
+if (!isTRUE(nrow(full_summary) == nrow(airbnb_summary))) {
+  stop(
+    "06: Joining rental data changed the number of Airbnb summary rows.",
+    call. = FALSE
+  )
+}
 
 #--- Output --------------------------------------------------------------------
 write_csv(full_summary, here("03_output","full_rental_summary_bylocation.csv"))

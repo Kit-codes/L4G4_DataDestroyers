@@ -16,7 +16,14 @@ library(tidyverse)
 library(here)
 
 #--- Load Data -----------------------------------------------------------------
-airbnb_chch_raw <- read_csv(here("03_output", "airbnb_chch_preprocessed.csv"))
+airbnb_chch_raw <- read_csv(
+  here("03_output", "airbnb_chch_preprocessed.csv"),
+  col_types = cols(
+    id = col_character(),
+    host_id = col_character(),
+    last_review = col_character()
+  )
+)
 n_start <- nrow(airbnb_chch_raw)
 
 #--- Cleaning step - remove columns --------------------------------------------
@@ -59,6 +66,30 @@ n_price_dropped <- n_before_price - n_after_price
 
 #--- Check ---------------------------------------------------------------------
 str(airbnb_chch_clean)
+
+expected_rows <- nrow(airbnb_chch_raw) -
+  sum(is.na(airbnb_chch_raw$price))
+
+if (!isTRUE(nrow(airbnb_chch_clean) == expected_rows)) {
+  stop(
+    "03: Cleaned row count does not match input rows minus missing-price rows.",
+    call. = FALSE
+  )
+}
+
+if (anyNA(airbnb_chch_clean$price)) {
+  stop(
+    "03: Missing prices remain after cleaning.",
+    call. = FALSE
+  )
+}
+
+if (any(dropped_cols %in% names(airbnb_chch_clean))) {
+  stop(
+    "03: Columns intended for removal are still present.",
+    call. = FALSE
+  )
+}
 
 #--- Output --------------------------------------------------------------------
 write_csv(airbnb_chch_clean, here("03_output","airbnb_chch_cleaned.csv"))

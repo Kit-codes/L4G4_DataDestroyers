@@ -18,10 +18,13 @@ full_summary <- read.csv(here("03_output","full_rental_summary_bylocation.csv"))
 
 #--- Median Price of Christchurch central Airbnbs ------------------------------
 median_chch_central <- full_summary[full_summary$SA22026_name == cfg$central_sa2_name,"median_Airbnb_price"]
+
+# Sanity Check
 if (length(median_chch_central) == 0) {
   stop("No SA2 named '", cfg$central_sa2_name, "' in the summary. Check `central_sa2_name` in config.yaml.",
        call. = FALSE)
 }
+
 median_chch_central[1]
 
 #--- Output --------------------------------------------------------------------

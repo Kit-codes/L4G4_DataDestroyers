@@ -38,6 +38,25 @@ availability_365_summary <- numeric_summary(chch_data_all, availability_365)
 number_of_reviews_ltm_summary <- numeric_summary(chch_data_all, 
                                                  number_of_reviews_ltm)
 
+# Sanity Check
+if (!isTRUE(
+  sum(id_summary$count + id_summary$missing) == nrow(chch_data_all)
+)) {
+  stop(
+    "08: ID summary counts do not account for all input rows.",
+    call. = FALSE
+  )
+}
+
+if (!isTRUE(
+  nrow(price_summary) == n_distinct(chch_data_all$year_month)
+)) {
+  stop(
+    "08: Price summaries do not cover every input month.",
+    call. = FALSE
+  )
+}
+
 #--- Summary -------------------------------------------------------------------
 summary_tables <- list(
   "ID" = id_summary,

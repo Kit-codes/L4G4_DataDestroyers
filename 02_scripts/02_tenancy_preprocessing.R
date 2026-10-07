@@ -38,9 +38,20 @@ message("Tenancy window: ", window_start, " to ", window_end)
 tenancy_data_current <- tenancy_data_full |>
   filter(between(TimeFrame, window_start, window_end))
 
+#--- Sanity Check --------------------------------------------------------------
+# All dates should be within the selected window
 if (nrow(tenancy_data_current) == 0) {
   stop("No tenancy data between ", window_start, " and ", window_end,
        ". The tenancy file does not cover the Airbnb months yet.")
+}
+
+if (!isTRUE(all(
+  between(tenancy_data_current$TimeFrame, window_start, window_end)
+))) {
+  stop(
+    "02: Tenancy dates fall outside the selected time window or are missing.",
+    call. = FALSE
+  )
 }
 
 tenancy_data_chch <- tenancy_data_current |>

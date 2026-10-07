@@ -34,10 +34,29 @@ listings_cols <- c("id", "host_id", "neighbourhood_group", "neighbourhood",
 nz_data_all <- map2_dfr(
   airbnb_months$file,
   airbnb_months$year_month,
-  ~ read_csv(.x) |>
+  ~ read_csv(.x,
+             col_types = cols(
+               id = col_character(),
+               host_id = col_character(),
+               last_review = col_character()
+             )) |>
     check_columns(listings_cols, basename(.x)) |>
     mutate(year_month = .y)
 )
+
+#--- Sanity Check --------------------------------------------------------------
+# Merged rows should equal the total rows in the monthly files
+raw_row_count <- map_int(
+  airbnb_months$file,
+  ~ nrow(read_csv(.x, col_select = id, show_col_types = FALSE))
+)
+
+if (!isTRUE(nrow(nz_data_all) == sum(raw_row_count))) {
+  stop(
+    "01: Merged row count does not match the total input row count.",
+    call. = FALSE
+  )
+}
 
 #--- Filter listings -----------------------------------------------------------
 chch_data_all <- nz_data_all |>

@@ -41,6 +41,17 @@ ward_prices_long <- ward_summary |>
   select(WARD2023_name, Airbnb = median_airbnb_price, Rental = rent_per_night) |>
   pivot_longer(c(Airbnb, Rental), names_to = "Type", values_to = "price")
 
+# Sanity Check
+if (!isTRUE(
+  nrow(ward_prices_long) ==
+  2 * sum(!is.na(ward_summary$rent_per_night))
+)) {
+  stop(
+    "13: Ward price plot data should contain two rows per selected ward.",
+    call. = FALSE
+  )
+}
+
 p_ward_prices <- ggplot(ward_prices_long, aes(x = price, y = WARD2023_name, colour = Type)) +
   geom_point() +
   labs(
@@ -54,6 +65,14 @@ save_plot(p_ward_prices, "13_ward_price_airbnb_vs_rental")
 sa2_prices <- sa2_summary |>
   mutate(rent_per_night = Median_rent / 7) |>
   filter(!is.na(median_Airbnb_price), !is.na(rent_per_night))
+
+# Sanity Check
+if (nrow(sa2_prices) == 0) {
+  stop(
+    "13: No SA2 areas have both Airbnb and rental prices for comparison.",
+    call. = FALSE
+  )
+}
 
 p_sa2_prices <- ggplot(sa2_prices, aes(x = rent_per_night, y = median_Airbnb_price)) +
   geom_point() +
@@ -71,6 +90,14 @@ ward_counts_long <- ward_summary |>
          `Airbnb listings (all months)` = total_airbnb_properties,
          `Rental bonds`                 = total_rental_bonds) |>
   pivot_longer(-WARD2023_name, names_to = "Type", values_to = "count")
+
+# Sanity Check
+if (!isTRUE(nrow(ward_counts_long) == 2 * nrow(ward_summary))) {
+  stop(
+    "13: Ward count plot data should contain two rows per ward.",
+    call. = FALSE
+  )
+}
 
 p_ward_counts <- ggplot(ward_counts_long, aes(x = count, y = WARD2023_name)) +
   geom_col() +

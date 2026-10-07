@@ -91,6 +91,14 @@ lookup <- if (file.exists(lookup_file)) {
          SA22026_name = character())
 }
 
+#--- Sanity Check --------------------------------------------------------------
+if (anyDuplicated(lookup$coord_key) > 0) {
+  stop(
+    "05: The area lookup contains duplicate coordinate keys.",
+    call. = FALSE
+  )
+}
+
 # Only locations not already in the lookup
 new_locations <- unique_locations |>
   filter(!coord_key %in% lookup$coord_key)
@@ -140,6 +148,14 @@ if (nrow(new_locations) > 0) {
 listings_with_area <- listings |>
   left_join(select(lookup, coord_key, SA22026_code), by = "coord_key") |>
   select(-coord_key)
+
+#--- Sanity Check --------------------------------------------------------------
+if (!isTRUE(nrow(listings_with_area) == nrow(listings))) {
+  stop(
+    "05: Adding area codes changed the number of listing rows.",
+    call. = FALSE
+  )
+}
 
 #--- Output --------------------------------------------------------------------
 write_csv(listings_with_area, output_file)

@@ -61,6 +61,21 @@ airbnb_count <- airbnb |>
     .groups = "drop"
   )
 
+# Sanity Check
+expected_airbnb_count <- airbnb |>
+  filter(year_month == latest_month) |>
+  summarise(count = n_distinct(id)) |>
+  pull(count)
+
+if (!isTRUE(
+  sum(airbnb_count$airbnb_count) == expected_airbnb_count
+)) {
+  stop(
+    "12: Summarised Airbnb counts do not match distinct IDs in the latest month.",
+    call. = FALSE
+  )
+}
+
 #--- Get rental bond count by SA2 ----------------------------------------------
 rental_count <- bond |>
   filter(
@@ -73,6 +88,14 @@ rental_count <- bond |>
     rental_count = `Active Bonds`
   )
 
+# Sanity Check
+if (anyDuplicated(rental_count$SA22026_code) > 0) {
+  stop(
+    "12: The rental count table contains duplicate SA2 codes.",
+    call. = FALSE
+  )
+}
+
 #--- Join the two summary tables -----------------------------------------------
 
 location_counts <- full_join(
@@ -80,6 +103,27 @@ location_counts <- full_join(
   rental_count,
   by = "SA22026_code"
 )
+
+# Sanity Check
+if (!isTRUE(
+  sum(location_counts$airbnb_count, na.rm = TRUE) ==
+  sum(airbnb_count$airbnb_count, na.rm = TRUE)
+)) {
+  stop(
+    "12: Joining count tables changed the Airbnb total.",
+    call. = FALSE
+  )
+}
+
+if (!isTRUE(
+  sum(location_counts$rental_count, na.rm = TRUE) ==
+  sum(rental_count$rental_count, na.rm = TRUE)
+)) {
+  stop(
+    "12: Joining count tables changed the rental bond total.",
+    call. = FALSE
+  )
+}
 
 #--- Replace missing counts with 0 ---------------------------------------------
 location_counts <- location_counts |>
@@ -98,6 +142,8 @@ location_counts <- location_counts |>
 names(area_lookup)
 
 #--- Add area name and sort results --------------------------------------------
+n_before_name_join <- nrow(location_counts)
+
 location_counts <- location_counts |>
   left_join(
     area_lookup |>
@@ -115,6 +161,13 @@ location_counts <- location_counts |>
   arrange(SA22026_code)
 
 #--- Checks --------------------------------------------------------------------
+if (!isTRUE(nrow(location_counts) == n_before_name_join)) {
+  stop(
+    "12: Adding area names changed the number of location rows.",
+    call. = FALSE
+  )
+}
+
 cat(
   "\nNumber of SA2 areas:",
   nrow(location_counts),

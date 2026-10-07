@@ -48,6 +48,14 @@ sa2_ward_lookup <- ward_counts |>
     by = "SA22023_code"
   )
 
+# Sanity Check
+if (anyDuplicated(sa2_ward_lookup$SA22023_code) > 0) {
+  stop(
+    "07: The selected ward lookup contains more than one row per SA2.",
+    call. = FALSE
+  )
+}
+
 sum(sa2_ward_lookup$n_wards_touched > 1)
 
 write_csv(sa2_ward_lookup, lookup_output)
@@ -60,6 +68,14 @@ full_summary_ward <- full_summary |>
       select(SA22023_code, WARD2023_code, WARD2023_name, n_wards_touched),
     by = c("SA22026_code" = "SA22023_code")
   )
+
+# Sanity Check
+if (!isTRUE(nrow(full_summary_ward) == nrow(full_summary))) {
+  stop(
+    "07: Adding ward information changed the number of summary rows.",
+    call. = FALSE
+  )
+}
 
 
 sum(is.na(full_summary_ward$WARD2023_name))
@@ -78,6 +94,36 @@ ward_summary <- full_summary_ward |>
     .groups = "drop"
   ) |>
   arrange(desc(total_airbnb_properties))
+
+# Sanity Check
+if (!isTRUE(
+  sum(ward_summary$total_airbnb_properties, na.rm = TRUE) ==
+  sum(full_summary_ward$Number_of_Airbnb_properties, na.rm = TRUE)
+)) {
+  stop(
+    "07: Airbnb counts changed after grouping by ward.",
+    call. = FALSE
+  )
+}
+
+if (!isTRUE(
+  sum(ward_summary$total_rental_bonds, na.rm = TRUE) ==
+  sum(full_summary_ward$Number_of_rental_bonds, na.rm = TRUE)
+)) {
+  stop(
+    "07: Rental bond counts changed after grouping by ward.",
+    call. = FALSE
+  )
+}
+
+if (!isTRUE(
+  sum(ward_summary$n_SA2_areas) == nrow(full_summary_ward)
+)) {
+  stop(
+    "07: The SA2 row count changed after grouping by ward.",
+    call. = FALSE
+  )
+}
 
 print(ward_summary, n = Inf)
 

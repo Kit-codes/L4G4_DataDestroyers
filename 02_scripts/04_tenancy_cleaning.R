@@ -48,6 +48,20 @@ tenancy_chch_clean <- tenancy_chch_raw |>
 #--- Check ---------------------------------------------------------------------
 str(tenancy_chch_clean)
 
+if (!isTRUE(nrow(tenancy_chch_clean) == nrow(tenancy_chch_raw))) {
+  stop(
+    "04: Removing columns changed the number of tenancy rows.",
+    call. = FALSE
+  )
+}
+
+if (any(dropped_cols %in% names(tenancy_chch_clean))) {
+  stop(
+    "04: Columns intended for removal are still present.",
+    call. = FALSE
+  )
+}
+
 #--- Output --------------------------------------------------------------------
 write_csv(tenancy_chch_clean, here("03_output","tenancy_chch_cleaned.csv"))
 
