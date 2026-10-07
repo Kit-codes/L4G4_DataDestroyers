@@ -1,7 +1,12 @@
 #--- Compare Full Data Set -----------------------------------------------------
-# Compare the number of beds per location airbnb vs tenancy
+# Decription: Compare the number of beds per location airbnb vs tenancy
+
+#Inputs: airbnb_chch_cleaned_witharea.csv - csv file containing cleaned airbnb data with area codes
+#        tenancy_chch_cleaned.csv - csv file containing cleaned tenancy data
+
+# Outputs:airbnb_rental_properties_count_by_location.csv - csv file containing bed counts for tenancy and airbnb, by location
 #
-# Load Libraries
+#--- Load libraries ------------------------------------------------------------
 library(tidyverse)
 library(here)
 source(here("02_scripts", "00_tools", "config.R"))

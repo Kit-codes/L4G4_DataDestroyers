@@ -1,10 +1,16 @@
 #--- Plotting Full Data Set ----------------------------------------------------
-# Rental vs Airbnb visualisations (saved to 05_plots/)
-#   1. Nightly price by ward: Airbnb vs rental
-#   2. Nightly price for each SA2 area: Airbnb vs rental
-#   3. Number of Airbnb listings and rental bonds by ward
-#
-# Load Libraries
+# Description: Rental vs Airbnb visualisations (saved to 05_plots/)
+#              1. Nightly price by ward: Airbnb vs rental
+#              2. Nightly price for each SA2 area: Airbnb vs rental
+#              3. Number of Airbnb listings and rental bonds by ward
+
+# Inputs: full_rental_summary_byward - Airbnb and tenancy data by location (ward level)
+#         full_rental_summary_withward.csv - Airbnb and tenancy data by location (suburb level) with ward column
+# Outputs: 13_ward_price_airbnb_vs_rental.png
+#          13_sa2_price_airbnb_vs_rental.png
+#          13_ward_counts_airbnb_vs_rental.png
+
+#--- Load libraries ------------------------------------------------------------
 library(tidyverse)
 library(here)
 source(here("02_scripts", "00_tools", "config.R"))
