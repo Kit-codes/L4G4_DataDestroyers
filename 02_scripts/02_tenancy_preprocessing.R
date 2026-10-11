@@ -17,7 +17,7 @@ source(here("02_scripts", "00_tools", "config.R"))
 
 #--- Load Data -----------------------------------------------------------------
 # Read tenancy data file
-tenancy_data_full <- read_csv(here("01_data","Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv")) |>
+tenancy_data_full <- read_csv(here("01_data","Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv.gz")) |>
   check_columns(c("TimeFrame", "Location Id", "Dwelling Type", "Number Of Beds",
                   "Total Bonds", "Active Bonds", "Closed Bonds", "Median Rent",
                   "Geometric Mean Rent", "Upper Quartile Rent",

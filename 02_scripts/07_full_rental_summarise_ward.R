@@ -17,7 +17,7 @@ cfg <- get_config()
 
 #--- Load Data -----------------------------------------------------------------
 summary_file <- here("03_output", "full_rental_summary_bylocation.csv")
-ward_source_file <- here("01_data", "geographic-areas-table-2023.csv")
+ward_source_file <- here("01_data", "geographic-areas-table-2023.csv.gz")
 lookup_output <- here("03_output", "full_rental_sa_to_ward_lookup.csv")
 withward_output <- here("03_output", "full_rental_summary_withward.csv")
 ward_summary_output <- here("03_output", "full_rental_summary_byward.csv")
