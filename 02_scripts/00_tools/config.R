@@ -15,11 +15,11 @@ library(here)
 get_airbnb_months <- function() {
   files <- list.files(
     here("01_data", "01_airbnb_rawdata"),
-    pattern = "^listings_\\d{4}_\\d{2}\\.csv$",
+    pattern = "^listings_\\d{4}_\\d{2}\\.csv.gz$",
     full.names = TRUE
   )
   if (length(files) == 0) {
-    stop("No listings_YYYY_MM.csv files found in 01_data/01_airbnb_rawdata",
+    stop("No listings_YYYY_MM.csv.gz files found in 01_data/01_airbnb_rawdata",
          call. = FALSE)
   }
   tibble(
