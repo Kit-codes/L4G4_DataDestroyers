@@ -34,6 +34,12 @@
 # locations to look up (see .Renviron.example).
 #
 #--- Expected project layout ---------------------------------------------------
+
+
+#Read API key file
+readRenviron(".Renviron")
+
+
 # Folders that can be created if missing as they hold generated files
 create_dirs <- c(
   "01_data",
