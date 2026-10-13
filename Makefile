@@ -2,23 +2,27 @@
 # Run the pipeline with make (from the project root). Only the steps whose
 # inputs have changed are re-run, e.g. after adding a new month of Airbnb data
 # or editing config.yaml.
-# Runs every script in order instead.
+# To run every script in order regardless, use `Rscript pipeline.R` instead.
 # Do not use `make -j`, the steps must run one after another.
 # ------------------------------------------------------------------------------
 
 .PHONY: all check clean clean-all
 
+# Delete a half-written output if its script fails, so make doesn't treat it as up to date.
+.DELETE_ON_ERROR:
+
 OUT   := 03_output
 DOC   := 04_documentation
-PLOTS := 05_plots
+# Plots are written here by save_plot() in 02_scripts/00_tools/config.R
+PLOTS := $(OUT)/00_plots
 DATA  := 01_data
 SCR   := 02_scripts
 
-RAW     := $(wildcard $(DATA)/01_airbnb_rawdata/listings_*.csv)
+RAW     := $(wildcard $(DATA)/01_airbnb_rawdata/listings_*.csv.gz)
 HELPERS := $(wildcard $(SCR)/00_tools/*.R)
-TENANCY := $(DATA)/Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv
+TENANCY := $(DATA)/Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv.gz
 CHCH    := $(DATA)/geographic_area_table_2026_chch.csv
-WARDS   := $(DATA)/geographic-areas-table-2023.csv
+WARDS   := $(DATA)/geographic-areas-table-2023.csv.gz
 
 # --- Check --------------------------------------------------------------------
 # The step that writes several files is tracked by its first output.
@@ -54,7 +58,7 @@ $(OUT)/tenancy_chch_cleaned.csv: $(SCR)/04_tenancy_cleaning.R $(OUT)/tenancy_chc
 	Rscript $(SCR)/04_tenancy_cleaning.R
 
 # 05: SA2 area code for each listing (Koordinates API; key only needed for new
-# locations). area_code_lookup.csv is a cache.
+# locations). Also writes area_code_lookup.csv, a cache that script 12 reads.
 $(OUT)/airbnb_chch_cleaned_witharea.csv: $(SCR)/05_airbnb_parallel_processing.R $(OUT)/airbnb_chch_cleaned.csv $(CHCH) config.yaml $(HELPERS)
 	Rscript $(SCR)/05_airbnb_parallel_processing.R
 
