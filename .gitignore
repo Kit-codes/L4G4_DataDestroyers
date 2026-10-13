@@ -1,5 +1,6 @@
 # OS junk files
 .DS_Store
+**/.DS_Store
 Thumbs.db
 desktop.ini
 
@@ -13,18 +14,18 @@ desktop.ini
 # RStudio
 .Rproj.user/
 
-# Secrets / environment variables 
+# Secrets / environment variables
 .Renviron
 *.Renviron
 !.Renviron.example
 .env
 
-# R Markdown build artifacts
+# R Markdown / Quarto build artifacts
 *_cache/
+*_files/
 *.utf8.md
 *.knit.md
+.quarto/
 
-#untracked folders - output  
+# Generated pipeline output
 03_output/
-01_plots/
-z_bin/

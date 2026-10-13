@@ -6,9 +6,9 @@
 
 # Inputs: full_rental_summary_byward - Airbnb and tenancy data by location (ward level)
 #         full_rental_summary_withward.csv - Airbnb and tenancy data by location (suburb level) with ward column
-# Outputs: 13_ward_price_airbnb_vs_rental.png
-#          13_sa2_price_airbnb_vs_rental.png
-#          13_ward_counts_airbnb_vs_rental.png
+# Outputs: 12_ward_price_airbnb_vs_rental.png
+#          12_sa2_price_airbnb_vs_rental.png
+#          12_ward_counts_airbnb_vs_rental.png
 
 #--- Original Airbnb vs updated Airbnb vs rental -------------------------------
 

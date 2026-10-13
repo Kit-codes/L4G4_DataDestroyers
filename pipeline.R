@@ -1,39 +1,48 @@
 #--- Pipeline ------------------------------------------------------------------
-# Run the whole project with one call.
+# Runs the whole project with one call: checks the folders and config.yaml,
+# then runs every numbered script in 02_scripts/ in order.
 #
+# From the terminal (run from the project root):
+#   Rscript pipeline.R              # check, then run every script
+#   Rscript pipeline.R --check      # only check folders and config.yaml
+#   Rscript pipeline.R --from 5     # resume from script 05 onwards
 #
-# From the command line (run from the project root):
-#
-# To check folders + config, then run every script:
-#   Rscript pipeline.R
-#
-# To only check the folders and config.yaml
-#   Rscript pipeline.R --check 
-#
-# # resume from script 05 onwards
-#   Rscript pipeline.R --from 5
-#
-# Or if you have make, only re-run what changed (view the Makefile):
+# With make, only the steps whose inputs have changed are re-run
+# (see the Makefile; do not use `make -j`):
 #   make
 #
-# From R / RStudio:
+# From R / RStudio console:
 #   source("pipeline.R")
-#   run_pipeline()
-#   run_pipeline(from = 5)
-#   check_project_structure()
+#   run_pipeline()                  # run every script
+#   run_pipeline(from = 5)          # resume from script 05 onwards
+#   check_project_structure()       # only check folders, scripts and inputs
 #
+# Adding new Airbnb months:
+#   Drop the new listings_YYYY_MM.csv.gz files into 01_data/01_airbnb_rawdata/
+#   and run the pipeline again. The month range, tenancy date window,
+#   latest-snapshot filters and API lookups all follow from that folder.
 #
-# To process new months drop the new listings_YYYY_MM.csv files into
-# 01_data/01_airbnb_rawdata/ and run the pipeline again. The month range,
-# tenancy date window, latest-snapshot filters and API lookups all follow
-# from what is in that folder.
-#
-#
-#
-# Settings live in config.yaml. Needs KOORDINATES_API_KEY in .Renviron only when there are new listing
-# locations to look up (see .Renviron.example).
+# Settings:
+#   Analysis settings live in config.yaml.
+#   KOORDINATES_API_KEY must be set in .Renviron (copy .Renviron.example) when
+#   there are listing locations not already in 03_output/area_code_lookup.csv.
+#   03_output/ is not stored in git, so the first run on a fresh clone create it.
 #
 #--- Expected project layout ---------------------------------------------------
+#   01_data/            raw and reference data (inputs, never edited by scripts)
+#   02_scripts/         numbered scripts, plus 00_tools/ helper functions
+#   03_output/          generated tables plots go in 03_output/00_plots/
+#   04_documentation/   cleaning logs, data summary and report
+#   config.yaml         analysis settings
+# Missing output folders are created below; missing code or input files are
+# reported together as one error.
+#
+#--- Pipeline ------------------------------------------------------------------
+
+#Read API key file
+readRenviron(".Renviron")
+
+
 # Folders that can be created if missing as they hold generated files
 create_dirs <- c(
   "01_data",
@@ -49,9 +58,9 @@ code_dirs <- c("02_scripts", file.path("02_scripts", "00_tools"))
 # Input files the scripts read but cannot be generated.
 required_inputs <- c(
   "config.yaml",
-  file.path("01_data", "Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv"),
+  file.path("01_data", "Detailed-Quarterly-Tenancy-Q1-2020-Q3-2026.csv.gz"),
   file.path("01_data", "geographic_area_table_2026_chch.csv"),
-  file.path("01_data", "geographic-areas-table-2023.csv")
+  file.path("01_data", "geographic-areas-table-2023.csv.gz")
 )
 
 required_tools <- file.path("02_scripts", "00_tools",
@@ -127,14 +136,14 @@ check_project_structure <- function(root = find_project_root(), create = TRUE) {
     }
   }
   raw_dir <- p("01_data", "01_airbnb_rawdata")
-  listings <- list.files(raw_dir, pattern = "^listings_\\d{4}_\\d{2}\\.csv$")
+  listings <- list.files(raw_dir, pattern = "^listings_\\d{4}_\\d{2}\\.csv.gz$")
   if (length(listings) == 0) {
     hint <- ""
     if (dir.exists(p("01_data", "1_airbnb_rawdata"))) {
       hint <- " (found 01_data/1_airbnb_rawdata - rename it to 01_airbnb_rawdata)"
     }
     problems <- c(problems, paste0(
-      "No listings_YYYY_MM.csv files in 01_data/01_airbnb_rawdata", hint))
+      "No listings_YYYY_MM.csv.gz files in 01_data/01_airbnb_rawdata", hint))
   }
   
   if (length(created) > 0) {

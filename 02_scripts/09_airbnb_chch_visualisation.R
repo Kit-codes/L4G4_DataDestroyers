@@ -1,4 +1,4 @@
-#--- AirBnb Christchurch Visualisation -----------------------------------------
+ #--- AirBnb Christchurch Visualisation -----------------------------------------
 #Description: Creates plots for  Airbnb Data - pre-cleaning
 #             1.New Zealand price distribution
 #             2.Christchurch price distribution
