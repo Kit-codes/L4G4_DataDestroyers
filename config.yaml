@@ -20,3 +20,5 @@ central_sa2_name: "Christchurch Central"
 # The listings files don't contain it. 
 #Leave as null to use the last day of the latest month.
 collection_date: null
+
+baseline_end_month: "2026_06"

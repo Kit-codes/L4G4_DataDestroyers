@@ -142,3 +142,69 @@ save_plot <- function(plot, name, width = 9, height = 6, dpi = 150) {
   message("  plot saved: 03_output/00_plots/", basename(path))
   invisible(path)
 }
+
+
+
+
+
+
+
+
+
+
+# Original period and updated period
+comparison_periods <- function(data, cfg) {
+  baseline <- cfg$baseline_end_month
+  
+  if (is.null(baseline) ||
+      length(baseline) != 1 ||
+      is.na(baseline) ||
+      !grepl("^\\d{4}_(0[1-9]|1[0-2])$", baseline)) {
+    stop(
+      "baseline_end_month must be a month such as '2026_08'.",
+      call. = FALSE
+    )
+  }
+  
+  months <- sort(unique(data$year_month))
+  
+  if (anyNA(months) || !baseline %in% months) {
+    stop(
+      "The baseline month is missing from the Airbnb data.",
+      call. = FALSE
+    )
+  }
+  
+  if (max(months) == baseline) {
+    warning(
+      "No months newer than the baseline: original and updated results are identical.",
+      call. = FALSE
+    )
+  }
+  
+  list(
+    baseline = baseline,
+    latest = max(months),
+    first = min(months),
+    old_label = paste("Original Airbnb:", min(months), "to", baseline),
+    new_label = paste("Updated Airbnb:", min(months), "to", max(months))
+  )
+}
+
+# Updated includes every row; original includes rows through the baseline.
+comparison_rows <- function(data, periods) {
+  bind_rows(
+    data |>
+      filter(year_month <= periods$baseline) |>
+      mutate(Version = periods$old_label),
+    
+    data |>
+      mutate(Version = periods$new_label)
+  ) |>
+    mutate(
+      Version = factor(
+        Version,
+        levels = c(periods$old_label, periods$new_label)
+      )
+    )
+}

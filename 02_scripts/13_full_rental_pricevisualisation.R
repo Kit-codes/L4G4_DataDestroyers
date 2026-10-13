@@ -10,107 +10,278 @@
 #          12_sa2_price_airbnb_vs_rental.png
 #          12_ward_counts_airbnb_vs_rental.png
 
-#--- Load libraries ------------------------------------------------------------
+#--- Original Airbnb vs updated Airbnb vs rental -------------------------------
+
 library(tidyverse)
 library(here)
 source(here("02_scripts", "00_tools", "config.R"))
+cfg <- get_config()
 
-#--- Load Data -----------------------------------------------------------------
-ward_summary <- read_csv(here("03_output", "full_rental_summary_byward.csv"),
-                         show_col_types = FALSE)
+#--- Read data -----------------------------------------------------------------
 
-sa2_summary <- read_csv(here("03_output", "full_rental_summary_withward.csv"),
-                        col_types = cols(SA22026_code = col_character()),
-                        show_col_types = FALSE)
+airbnb <- read_csv(
+  here("03_output", "airbnb_chch_cleaned_witharea.csv"),
+  col_types = cols(
+    id = col_character(),
+    SA22026_code = col_character()
+  ),
+  show_col_types = FALSE
+)
 
-# drop the one area with no ward, and convert weekly rent to a nightly price
-ward_summary <- ward_summary |>
+bond <- read_csv(
+  here("03_output", "tenancy_chch_cleaned.csv"),
+  col_types = cols(
+    `Location Id` = col_character(),
+    TimeFrame = col_date()
+  ),
+  show_col_types = FALSE
+)
+
+ward_lookup <- read_csv(
+  here("03_output", "full_rental_sa_to_ward_lookup.csv"),
+  col_types = cols(SA22023_code = col_character()),
+  show_col_types = FALSE
+) |>
+  transmute(
+    SA22026_code = SA22023_code,
+    WARD2023_name
+  )
+
+if (anyDuplicated(ward_lookup$SA22026_code) > 0) {
+  stop("The ward lookup contains duplicate SA2 codes.", call. = FALSE)
+}
+
+# Use raw month availability to define the periods.
+periods <- comparison_periods(get_airbnb_months(), cfg)
+
+airbnb_compare <- comparison_rows(airbnb, periods)
+
+version_colours <- setNames(
+  c("#0072B2", "#D55E00"),
+  c(periods$old_label, periods$new_label)
+)
+
+#--- Fixed rental reference ----------------------------------------------------
+# Keep rental data within the original Airbnb period.
+
+bond_reference <- bond |>
+  filter(
+    TimeFrame >= month_start(periods$first),
+    TimeFrame <= month_end(periods$baseline),
+    `Dwelling Type` == cfg$dwelling_type,
+    `Number Of Beds` == cfg$number_of_beds
+  )
+
+if (nrow(bond_reference) == 0 || anyNA(bond_reference$TimeFrame)) {
+  stop("No valid rental reference period is available.", call. = FALSE)
+}
+
+reference_quarter <- max(bond_reference$TimeFrame)
+
+rental_prices <- bond_reference |>
+  group_by(SA22026_code = `Location Id`) |>
+  summarise(
+    rent_per_night = median(`Median Rent`) / 7,
+    .groups = "drop"
+  )
+
+rental_counts <- bond_reference |>
+  filter(TimeFrame == reference_quarter) |>
+  transmute(
+    SA22026_code = `Location Id`,
+    rental_count = `Active Bonds`
+  )
+
+if (anyDuplicated(rental_counts$SA22026_code) > 0) {
+  stop("Rental reference has duplicate SA2 rows.", call. = FALSE)
+}
+
+#--- Airbnb prices by SA2 -------------------------------------------------------
+
+airbnb_prices <- airbnb_compare |>
+  filter(!is.na(SA22026_code)) |>
+  group_by(Version, SA22026_code) |>
+  summarise(
+    airbnb_price = median(price),
+    .groups = "drop"
+  )
+
+#--- Ward prices: three groups -------------------------------------------------
+
+ward_airbnb_prices <- airbnb_prices |>
+  left_join(ward_lookup, by = "SA22026_code") |>
   filter(!is.na(WARD2023_name)) |>
-  mutate(
-    rent_per_night = median_rent / 7,
-    gap            = median_airbnb_price - rent_per_night
-  )
+  group_by(Version, WARD2023_name) |>
+  summarise(
+    price = median(airbnb_price, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  mutate(Type = as.character(Version)) |>
+  select(WARD2023_name, Type, price)
 
-#--- Nightly price by ward: Airbnb vs rental -----------------------------------
-# Wards with no rental bond data have no price to compare, so are left out here
-no_rent_wards <- ward_summary$WARD2023_name[is.na(ward_summary$rent_per_night)]
+# Same SA2 domain for the rental reference in both Airbnb comparisons.
+ward_rental_prices <- rental_prices |>
+  semi_join(
+    distinct(airbnb_prices, SA22026_code),
+    by = "SA22026_code"
+  ) |>
+  left_join(ward_lookup, by = "SA22026_code") |>
+  filter(!is.na(WARD2023_name)) |>
+  group_by(WARD2023_name) |>
+  summarise(
+    price = if (all(is.na(rent_per_night))) {
+      NA_real_
+    } else {
+      median(rent_per_night, na.rm = TRUE)
+    },
+    .groups = "drop"
+  ) |>
+  mutate(Type = "Rental")
 
-ward_prices_long <- ward_summary |>
-  filter(!is.na(rent_per_night)) |>
-  mutate(WARD2023_name = fct_reorder(WARD2023_name, gap)) |>
-  select(WARD2023_name, Airbnb = median_airbnb_price, Rental = rent_per_night) |>
-  pivot_longer(c(Airbnb, Rental), names_to = "Type", values_to = "price")
+ward_prices_long <- bind_rows(
+  ward_airbnb_prices,
+  ward_rental_prices
+)
 
-# Sanity Check
-if (!isTRUE(
-  nrow(ward_prices_long) ==
-  2 * sum(!is.na(ward_summary$rent_per_night))
-)) {
-  stop(
-    "13: Ward price plot data should contain two rows per selected ward.",
-    call. = FALSE
-  )
-}
-
-p_ward_prices <- ggplot(ward_prices_long, aes(x = price, y = WARD2023_name, colour = Type)) +
-  geom_point() +
+p_ward_prices <- ggplot(
+  ward_prices_long,
+  aes(x = price, y = WARD2023_name, colour = Type, shape = Type)
+) +
+  geom_point(size = 2.5, na.rm = TRUE) +
+  scale_colour_manual(
+    values = c(version_colours, Rental = "#009E73")
+  ) +
   labs(
-    title   = "Airbnb vs rental price per night, by ward",
-    x       = "Price per night (NZD)",
-    y       = "Ward",
-    )+
-  theme(plot.title = element_text(size = 14, hjust= 0.5),
-        legend.position = "right",
-        legend.text = element_text(size = 8),    # Makes the key labels smaller
-        legend.title = element_text(size = 8)) 
-save_plot(p_ward_prices, "12_ward_price_airbnb_vs_rental")
+    title = "Airbnb and rental prices by ward",
+    subtitle = "Rental reference is fixed to the original period",
+    x = "Price per night (NZD)",
+    y = "Ward"
+  )
 
-#--- Each SA2 area: Airbnb vs rental nightly price -----------------------------
-sa2_prices <- sa2_summary |>
-  mutate(rent_per_night = Median_rent / 7) |>
-  filter(!is.na(median_Airbnb_price), !is.na(rent_per_night))
+save_plot(p_ward_prices, "13_ward_price_airbnb_vs_rental")
 
-# Sanity Check
+#--- SA2 scatter plot: two Airbnb points per area -------------------------------
+# Rental is represented by the x coordinate.
+
+sa2_prices <- airbnb_prices |>
+  left_join(rental_prices, by = "SA22026_code") |>
+  filter(!is.na(airbnb_price), !is.na(rent_per_night))
+
 if (nrow(sa2_prices) == 0) {
-  stop(
-    "13: No SA2 areas have both Airbnb and rental prices for comparison.",
-    call. = FALSE
-  )
+  stop("No SA2 prices are available for comparison.", call. = FALSE)
 }
 
-p_sa2_prices <- ggplot(sa2_prices, aes(x = rent_per_night, y = median_Airbnb_price)) +
-  geom_point() +
+p_sa2_prices <- ggplot(
+  sa2_prices,
+  aes(
+    x = rent_per_night,
+    y = airbnb_price,
+    colour = Version,
+    shape = Version
+  )
+) +
+  geom_point(alpha = 0.7, size = 2) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  scale_colour_manual(values = version_colours) +
   labs(
-    title    = "Airbnb vs rental price per night, by SA2 area",
-    x        = "Rental price per night (NZD)",
-    y        = "Airbnb price per night (NZD)"
-  )+
-  theme(plot.title = element_text(size = 14, hjust= 0.5))
-save_plot(p_sa2_prices, "12_sa2_price_airbnb_vs_rental")
-
-#--- Airbnb listings and rental bonds by ward ---------------------------------------
-ward_counts_long <- ward_summary |>
-  select(WARD2023_name,
-         `Airbnb listings (all months)` = total_airbnb_properties,
-         `Rental bonds`                 = total_rental_bonds) |>
-  pivot_longer(-WARD2023_name, names_to = "Type", values_to = "count")
-
-# Sanity Check
-if (!isTRUE(nrow(ward_counts_long) == 2 * nrow(ward_summary))) {
-  stop(
-    "13: Ward count plot data should contain two rows per ward.",
-    call. = FALSE
+    title = "Original and updated Airbnb prices by SA2",
+    x = "Rental price per night (NZD)",
+    y = "Airbnb price per night (NZD)",
+    colour = "Data period",
+    shape = "Data period"
   )
-}
 
-p_ward_counts <- ggplot(ward_counts_long, aes(x = count, y = WARD2023_name)) +
-  geom_col() +
-  facet_wrap(~ Type, scales = "free_x") +
+save_plot(p_sa2_prices, "13_sa2_price_airbnb_vs_rental")
+
+#--- Latest-month Airbnb counts ------------------------------------------------
+
+airbnb_snapshot_counts <- airbnb |>
+  filter(year_month %in% c(periods$baseline, periods$latest)) |>
+  left_join(ward_lookup, by = "SA22026_code") |>
+  filter(!is.na(WARD2023_name)) |>
+  group_by(year_month, WARD2023_name) |>
+  summarise(
+    count = n_distinct(id),
+    .groups = "drop"
+  )
+
+# Ward universe includes both Airbnb snapshots and rental data.
+ward_names <- ward_lookup |>
+  filter(!is.na(WARD2023_name)) |>
+  distinct(WARD2023_name)
+
+old_counts <- ward_names |>
+  left_join(
+    airbnb_snapshot_counts |>
+      filter(year_month == periods$baseline) |>
+      select(WARD2023_name, count),
+    by = "WARD2023_name"
+  ) |>
+  mutate(
+    count = replace_na(count, 0L),
+    Type = paste("Original Airbnb:", periods$baseline)
+  )
+
+new_counts <- ward_names |>
+  left_join(
+    airbnb_snapshot_counts |>
+      filter(year_month == periods$latest) |>
+      select(WARD2023_name, count),
+    by = "WARD2023_name"
+  ) |>
+  mutate(
+    count = replace_na(count, 0L),
+    Type = paste("Updated Airbnb:", periods$latest)
+  )
+
+ward_rental_counts <- rental_counts |>
+  left_join(ward_lookup, by = "SA22026_code") |>
+  filter(!is.na(WARD2023_name)) |>
+  group_by(WARD2023_name) |>
+  summarise(
+    # Keep unknown totals as NA rather than treating them as zero.
+    count = sum(rental_count),
+    .groups = "drop"
+  ) |>
+  mutate(Type = paste("Rental:", reference_quarter))
+
+ward_counts_long <- bind_rows(
+  old_counts,
+  new_counts,
+  ward_rental_counts
+)
+
+p_ward_counts <- ggplot(
+  ward_counts_long,
+  aes(x = count, y = WARD2023_name)
+) +
+  geom_col(na.rm = TRUE) +
+  facet_wrap(~ Type, nrow = 1, scales = "free_x") +
   labs(
-    title = "Airbnb listings and rental bonds by ward",
-    x     = "Count",
-    y     = "Ward"
-  )+
-  theme(plot.title = element_text(size = 14, hjust= 0.5))
-save_plot(p_ward_counts, "12_ward_counts_airbnb_vs_rental", width = 10)
+    title = "Original Airbnb, updated Airbnb and active rental bonds",
+    subtitle = "Areas without a ward are excluded",
+    x = "Count",
+    y = "Ward"
+  )
+
+save_plot(
+  p_ward_counts,
+  "13_ward_counts_airbnb_vs_rental",
+  width = 14
+)
+
+# Save the comparison data behind these plots.
+write_csv(
+  ward_prices_long,
+  here("03_output", "comparison_ward_prices.csv")
+)
+
+write_csv(
+  sa2_prices,
+  here("03_output", "comparison_sa2_prices.csv")
+)
+
+write_csv(
+  ward_counts_long,
+  here("03_output", "comparison_ward_counts.csv")
+)
