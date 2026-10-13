@@ -28,106 +28,167 @@ cfg <- get_config()
 nz_data <- read_csv(here("03_output", "airbnb_nz_preprocessed.csv"))
 chch_data <- read_csv(here("03_output", "airbnb_chch_preprocessed.csv"))
 
-#--- Price Plot ----------------------------------------------------------------
-p_price_nz <- ggplot(nz_data, aes(x = price)) +
-  geom_histogram(binwidth = 20) +
-  coord_cartesian(xlim = c(0, 5000)) + # 0-5000 span
-  labs(
-    title = "Distribution of Airbnb Prices in New Zealand",
-    x = "Price",
-    y = "Count"
-  )
-save_plot(p_price_nz, "09_price_distribution_nz")
+#--- Original and updated datasets ---------------------------------------------
 
-p_price_chch <- ggplot(chch_data, aes(x = price)) +
-  geom_histogram(binwidth = 10) +
-  coord_cartesian(xlim = c(0, 2000)) + # 0-2000 span
-  labs(
-    title = paste("Distribution of Airbnb Prices in", cfg$area),
-    x = "Price",
-    y = "Count"
-  )
-save_plot(p_price_chch, "09_price_distribution_chch")
+periods <- comparison_periods(nz_data, cfg)
 
-#--- Merge Plots ---------------------------------------------------------------
-price_comparison <- bind_rows(
-  nz_data |>
-    mutate(area = "All New Zealand"),
-  
-  chch_data|>
-    mutate(area = cfg$area)
+nz_compare <- comparison_rows(nz_data, periods)
+chch_compare <- comparison_rows(chch_data, periods)
+
+version_colours <- setNames(
+  c("#0072B2", "#D55E00"),
+  c(periods$old_label, periods$new_label)
 )
 
-# Sanity Check
-if (!isTRUE(
-  nrow(price_comparison) == nrow(nz_data) + nrow(chch_data)
-)) {
-  stop(
-    "09: Combined price plot data has an unexpected row count.",
-    call. = FALSE
+#--- New Zealand price distribution --------------------------------------------
+
+p_price_nz <- ggplot(
+  nz_compare,
+  aes(x = price, fill = Version, colour = Version)
+) +
+  geom_histogram(
+    binwidth = 20,
+    boundary = 0,
+    position = "identity",
+    alpha = 0.35,
+    na.rm = TRUE
+  ) +
+  scale_fill_manual(values = version_colours) +
+  scale_colour_manual(values = version_colours) +
+  coord_cartesian(xlim = c(0, 5000)) +
+  labs(
+    title = "New Zealand Airbnb prices: original vs updated",
+    x = "Price (NZD)",
+    y = "Count",
+    fill = "Data period",
+    colour = "Data period"
   )
-}
+
+save_plot(p_price_nz, "09_price_distribution_nz")
+
+#--- Christchurch price distribution -------------------------------------------
+
+p_price_chch <- ggplot(
+  chch_compare,
+  aes(x = price, fill = Version, colour = Version)
+) +
+  geom_histogram(
+    binwidth = 10,
+    boundary = 0,
+    position = "identity",
+    alpha = 0.35,
+    na.rm = TRUE
+  ) +
+  scale_fill_manual(values = version_colours) +
+  scale_colour_manual(values = version_colours) +
+  coord_cartesian(xlim = c(0, 2000)) +
+  labs(
+    title = paste(cfg$area, "Airbnb prices: original vs updated"),
+    x = "Price (NZD)",
+    y = "Count",
+    fill = "Data period",
+    colour = "Data period"
+  )
+
+save_plot(p_price_chch, "09_price_distribution_chch")
+
+#--- New Zealand vs Christchurch ------------------------------------------------
+# One panel per area, with original and updated shown in each panel.
+
+price_comparison <- bind_rows(
+  nz_compare |> mutate(Area = "All New Zealand"),
+  chch_compare |> mutate(Area = cfg$area)
+)
 
 p_price_comparison <- ggplot(
   price_comparison,
-  aes(
-    x = price,
-    fill = area
-  )
+  aes(x = price, fill = Version, colour = Version)
 ) +
   geom_histogram(
     binwidth = 25,
+    boundary = 0,
     position = "identity",
-    alpha = 0.5
+    alpha = 0.35,
+    na.rm = TRUE
   ) +
-  coord_cartesian(
-    xlim = c(0, 1000)
-  ) +
+  facet_wrap(~ Area, ncol = 1) +
+  scale_fill_manual(values = version_colours) +
+  scale_colour_manual(values = version_colours) +
+  coord_cartesian(xlim = c(0, 1000)) +
   labs(
-    title = paste("Airbnb Price Distribution: New Zealand vs", cfg$area),
+    title = "Airbnb prices: New Zealand vs Christchurch",
     x = "Price (NZD)",
     y = "Count",
-    fill = "Area"
+    fill = "Data period",
+    colour = "Data period"
   )
-save_plot(p_price_comparison, "09_price_distribution_nz_vs_chch")
 
-#--- Days Since Last Review ----------------------------------------------------
-# Calculate the day since last review use latest snapshot date 
-# (see get_collection_date() in pipeline_helpers.R)
-airbnb_collection_date <- get_collection_date()
+save_plot(
+  p_price_comparison,
+  "09_price_distribution_nz_vs_chch",
+  height = 8
+)
 
-chch_data <- chch_data |>
+#--- Days since last review ----------------------------------------------------
+
+baseline_date <- if (is.null(cfg$collection_date)) {
+  month_end(periods$baseline)
+} else {
+  as.Date(as.character(cfg$collection_date))
+}
+
+updated_date <- get_collection_date()
+
+if (length(baseline_date) != 1 ||
+    is.na(baseline_date) ||
+    is.na(updated_date)) {
+  stop("Invalid review comparison date.", call. = FALSE)
+}
+
+review_comparison <- chch_compare |>
   mutate(
     last_review = as.Date(last_review),
-    days_since_last_review = as.numeric(
-      airbnb_collection_date  - last_review
-    )
+    reference_date = if_else(
+      Version == periods$old_label,
+      baseline_date,
+      updated_date
+    ),
+    days_since_last_review = as.numeric(reference_date - last_review)
   )
 
-# Sanity Check
-if (any(chch_data$days_since_last_review < 0, na.rm = TRUE)) {
+if (any(review_comparison$days_since_last_review < 0, na.rm = TRUE)) {
   stop(
-    "09: A last-review date is later than the collection date. ",
-    "Check the review dates and collection date.",
+    "A review date is later than its comparison reference date.",
     call. = FALSE
   )
 }
 
-#--- Days Since Last Review Plot ----------------------------------------------------
 p_days_since_review <- ggplot(
-  chch_data,
-  aes(x = days_since_last_review)
+  review_comparison,
+  aes(x = days_since_last_review, fill = Version, colour = Version)
 ) +
-  coord_cartesian(xlim = c(-10, 1000)) +
   geom_histogram(
     binwidth = 5,
+    boundary = 0,
+    position = "identity",
+    alpha = 0.35,
     na.rm = TRUE
   ) +
+  scale_fill_manual(values = version_colours) +
+  scale_colour_manual(values = version_colours) +
+  coord_cartesian(xlim = c(-10, 1000)) +
   labs(
-    title = "Distribution of Days Since Last Review",
-    x = "Days Since Last Review",
-    y = "Count"
+    title = "Days since last review: original vs updated",
+    subtitle = paste(
+      "Original reference:", baseline_date,
+      "| Updated reference:", updated_date
+    ),
+    x = "Days since last review",
+    y = "Count",
+    fill = "Data period",
+    colour = "Data period"
   )
+
 save_plot(p_days_since_review, "09_days_since_last_review")
 
 #--- Calculate top 10% number of reviews ---------------------------------------
