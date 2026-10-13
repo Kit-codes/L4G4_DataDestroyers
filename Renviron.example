@@ -1,0 +1,3 @@
+# Copy this file to .Renviron (same folder) and paste your key after the =
+# Do not commit .Renviron - it is listed in .gitignore.
+KOORDINATES_API_KEY=
