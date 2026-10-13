@@ -1,15 +1,17 @@
 ---
-title: "Results"
+title: "Analysis Results"
 
 author: L4G4 Data Destroyers
 date: today
 date-format: "DD-MM-YYYY"
 
+
+
 format: 
   typst:
     mainfont: "Calibri"
     fontsize: 11pt
-    
+
 project:
   execute-dir: project 
   
@@ -17,8 +19,6 @@ editor: visual
 ---
 
 {{< pagebreak >}}
-
-## Analysis Results
 
 ```{r}
 #| label: load libraries
@@ -29,22 +29,95 @@ library(tidyverse)
 library(ggplot2)
 library(here)
 library(knitr)
+library(png) 
+library(patchwork)
+library(tinytable)
+
+source(here("02_scripts","00_tools","data_summary.R"))
+```
+
+## 1 AirBnB Data
+
+An initial summary of the Airbnb data set for Christchurch was produced. This gave an overview of the data including column contents, maximum and minimum values . Of particular interest was the Price column summary (Table 1), which showed that price data is missing entirely from December 2025 to February 2026. We can also see how many missing prices there are for each month that there is price data, which can help in quantifying how much data may be lost if the decision is made to remove rows with no prices during cleaning.\
+\
+
+```{r fig.align="center"}
+#| label: Price summary
+#| echo: false
+chch_data_all <- read_csv(here("03_output","airbnb_chch_preprocessed.csv" ),show_col_types = FALSE)
+price_summary <- numeric_summary(chch_data_all, price)
+
+
+summary_table <- tt(price_summary,digits = 2, fontsize = 0.9,
+   caption = "Summary Statistics for Christchurch Airbnb Prices" )|> 
+  theme_striped()  |>   
+  style_tt(fontsize = 0.7, 
+           height = 0.8)
+
+summary_table
+```
+
+\
+ A full summary of the Airbnb data for Christchurch can be found in Apppedix A.
+
+### 1.1 AirBnB Price Distribution Plots
+
+#### Overall
+
+```{r}
+#| label: Christchurch price plot
+#| echo: false
+#| fig-align: center
+
+chch_price_plot <- readPNG(here("03_output","00_plots","09_price_distribution_chch.png"), native = TRUE)
+
+
+wrap_elements(chch_price_plot)
+
 
 ```
 
-### AirBnB Price Distribution Plots
+```{r}
+#| label: Christchurch vs NZ price plot
+#| echo: false
+#| fig-align: center
 
-![](images/09_price_distribution_chch.png){fig-align="center" width="500"}
+chchNZ_price_plot <- readPNG(here("03_output","00_plots","09_price_distribution_nz_vs_chch.png"), native = TRUE)
 
-![](images/09_price_distribution_nz_vs_chch.png){fig-align="center" width="500"}
 
-### AirBnB - Days Since Last Review
+wrap_elements(chchNZ_price_plot)
 
-![](images/09_days_since_last_review-01.png){fig-align="center"}
+```
 
-### AirBnB Top 10% of Reviews
+#### Latest Period Compared to Previous Period
+
+PLOT TO GO HERE
+
+### 1.3 AirBnB - Days Since Last Review
+
+#### Overall
+
+```{r}
+#| label: Days since last Review plot
+#| echo: false
+#| fig-align: center
+
+last_review_plot <- readPNG(here("03_output","00_plots","09_days_since_last_review.png"), native = TRUE)
+
+
+wrap_elements(last_review_plot)
+
+```
+
+#### Latest Period Compared to Previous Period
+
+PLOT HERE
+
+### 1.4 AirBnB Top 10% of Reviews
 
 TBD
+
+## Airbnb and Long Term Rental Comparisons
 
 ### AirBnB Median Price Christchurch central
 
@@ -54,19 +127,114 @@ TBD
 
 median_price_chch_central <- read_csv(here("03_output","airbnb_median_price_chch_central.csv" ),show_col_types = FALSE)
 
-knitr::kable(median_price_chch_central, format = "markdown")
+median_price_chch_central_table <- tt(median_price_chch_central,digits = 2, fontsize = 0.9,
+                    caption = "Median Airbnb Price, Christchurch Central" )|> 
+  theme_striped()  |>   
+  style_tt(fontsize = 0.7, 
+           height = 0.8)
+
+median_price_chch_central_table
 ```
 
 {{< pagebreak >}}
 
-### Short and Long Term Rental Maximum Price Difference  
+### Short and Long Term Rental Maximum Price Difference
 
-![](images/13_sa2_price_airbnb_vs_rental-01.png)
+#### Overall
 
-![](images/13_ward_price_airbnb_vs_rental.png)
+```{r}
+#| label: Short and Long Term Rental Price Difference by suburb
+#| echo: false
+#| fig-align: center
 
-ADD IN EXTRACTED ROW FOR
+price_compare_suburb<- readPNG(here("03_output","00_plots","12_sa2_price_airbnb_vs_rental.png"), native = TRUE)
 
-### Short and Long Term Rental Number of Beds By Location  
 
-![](images/13_ward_counts_airbnb_vs_rental.png)
+wrap_elements(price_compare_suburb)
+
+
+```
+
+```{r}
+#| label: Short and Long Term Rental Price Difference by ward
+#| echo: false
+#| fig-align: center
+
+price_compare_ward<- readPNG(here("03_output","00_plots","12_ward_price_airbnb_vs_rental.png"), native = TRUE)
+
+
+wrap_elements(price_compare_ward)
+
+
+```
+
+#### Latest Period Compared to Previous Period
+
+plots here
+
+The maximum price difference between long and short term rentals at the suburb level was found to be:
+
+```{r}
+
+```
+
+```{r}
+#| label: maximum price differenc suburb
+#| echo: false
+
+max_price_diff <- read_csv(here("03_output","maximum_price_difference.csv" ),show_col_types = FALSE)
+
+max_suburb <- max_price_diff[1, c(4, 2, 7, 8)]
+colnames(max_suburb) <- c("Location", "Airbnb Price (night)", "Rental Price (night)", "Price Difference (night)")
+
+
+max_suburb_table <- tt(max_suburb,digits = 2, fontsize = 0.9,
+                                      caption = "Median Airbnb Price, Christchurch Central" )|> 
+  theme_striped()  |>   
+  style_tt(fontsize = 0.7, 
+           height = 0.8)
+
+max_suburb_table
+
+```
+
+The maximum price difference between long and short term rentals in Christchurch at Ward level is:
+
+### 
+
+```{r}
+#| label: maximum price differenc ward
+#| echo: false
+
+max_price_diff <- read_csv(here("03_output","maximum_price_difference.csv" ),show_col_types = FALSE)
+
+max_ward <- max_price_diff[2, c(1, 2, 7, 8)]
+colnames(max_ward) <- c("Location", "Airbnb Price (night)", "Rental Price (night)", "Price Difference (night)")
+
+
+max_ward_table <- tt(max_ward, digits = 2, fontsize = 0.9,
+                       caption = "Median Airbnb Price, Christchurch Central" )|> 
+  theme_striped()  |>   
+  style_tt(fontsize = 0.7, 
+           height = 0.8)
+
+max_ward_table
+
+```
+
+### Short and Long Term Rental Number of Beds By Location
+
+## Appendix
+
+### A. Summary of Airbnb data for Christchurch
+
+```{=typst}
+#columns(2, gutter: 12pt)[
+```
+::: {style="font-size: 0.8em;"}
+{{< include ../chch_summary.md >}}
+:::
+
+```{=typst}
+]
+```

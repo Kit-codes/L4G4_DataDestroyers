@@ -6,9 +6,9 @@
 
 # Inputs: full_rental_summary_byward - Airbnb and tenancy data by location (ward level)
 #         full_rental_summary_withward.csv - Airbnb and tenancy data by location (suburb level) with ward column
-# Outputs: 13_ward_price_airbnb_vs_rental.png
-#          13_sa2_price_airbnb_vs_rental.png
-#          13_ward_counts_airbnb_vs_rental.png
+# Outputs: 12_ward_price_airbnb_vs_rental.png
+#          12_sa2_price_airbnb_vs_rental.png
+#          12_ward_counts_airbnb_vs_rental.png
 
 #--- Load libraries ------------------------------------------------------------
 library(tidyverse)
@@ -58,8 +58,12 @@ p_ward_prices <- ggplot(ward_prices_long, aes(x = price, y = WARD2023_name, colo
     title   = "Airbnb vs rental price per night, by ward",
     x       = "Price per night (NZD)",
     y       = "Ward",
-    )
-save_plot(p_ward_prices, "13_ward_price_airbnb_vs_rental")
+    )+
+  theme(plot.title = element_text(size = 14, hjust= 0.5),
+        legend.position = "right",
+        legend.text = element_text(size = 8),    # Makes the key labels smaller
+        legend.title = element_text(size = 8)) 
+save_plot(p_ward_prices, "12_ward_price_airbnb_vs_rental")
 
 #--- Each SA2 area: Airbnb vs rental nightly price -----------------------------
 sa2_prices <- sa2_summary |>
@@ -81,8 +85,9 @@ p_sa2_prices <- ggplot(sa2_prices, aes(x = rent_per_night, y = median_Airbnb_pri
     title    = "Airbnb vs rental price per night, by SA2 area",
     x        = "Rental price per night (NZD)",
     y        = "Airbnb price per night (NZD)"
-  )
-save_plot(p_sa2_prices, "13_sa2_price_airbnb_vs_rental")
+  )+
+  theme(plot.title = element_text(size = 14, hjust= 0.5))
+save_plot(p_sa2_prices, "12_sa2_price_airbnb_vs_rental")
 
 #--- Airbnb listings and rental bonds by ward ---------------------------------------
 ward_counts_long <- ward_summary |>
@@ -106,5 +111,6 @@ p_ward_counts <- ggplot(ward_counts_long, aes(x = count, y = WARD2023_name)) +
     title = "Airbnb listings and rental bonds by ward",
     x     = "Count",
     y     = "Ward"
-  )
-save_plot(p_ward_counts, "13_ward_counts_airbnb_vs_rental", width = 10)
+  )+
+  theme(plot.title = element_text(size = 14, hjust= 0.5))
+save_plot(p_ward_counts, "12_ward_counts_airbnb_vs_rental", width = 10)

@@ -1,4 +1,4 @@
-#--- AirBnb Christchurch Visualisation -----------------------------------------
+ #--- AirBnb Christchurch Visualisation -----------------------------------------
 #Description: Creates plots for  Airbnb Data - pre-cleaning
 #             1.New Zealand price distribution
 #             2.Christchurch price distribution
@@ -36,17 +36,17 @@ p_price_nz <- ggplot(nz_data, aes(x = price)) +
     title = "Distribution of Airbnb Prices in New Zealand",
     x = "Price",
     y = "Count"
-  )
+  )+
+  theme(plot.title = element_text(size = 14, hjust= 0.5))
 save_plot(p_price_nz, "09_price_distribution_nz")
 
 p_price_chch <- ggplot(chch_data, aes(x = price)) +
   geom_histogram(binwidth = 10) +
   coord_cartesian(xlim = c(0, 2000)) + # 0-2000 span
-  labs(
-    title = paste("Distribution of Airbnb Prices in", cfg$area),
+  labs(title = paste("Distribution of Airbnb Prices in", cfg$area),
     x = "Price",
-    y = "Count"
-  )
+    y = "Count")+
+  theme(plot.title = element_text(size = 14, hjust= 0.5))
 save_plot(p_price_chch, "09_price_distribution_chch")
 
 #--- Merge Plots ---------------------------------------------------------------
@@ -68,27 +68,21 @@ if (!isTRUE(
   )
 }
 
-p_price_comparison <- ggplot(
-  price_comparison,
-  aes(
-    x = price,
-    fill = area
-  )
-) +
+p_price_comparison <- ggplot(price_comparison,aes(x = price,
+    fill = area)) +
   geom_histogram(
     binwidth = 25,
     position = "identity",
-    alpha = 0.5
-  ) +
-  coord_cartesian(
-    xlim = c(0, 1000)
-  ) +
-  labs(
-    title = paste("Airbnb Price Distribution: New Zealand vs", cfg$area),
+    alpha = 0.5) +
+  coord_cartesian(xlim = c(0, 1000)) +
+  labs(title = paste("Airbnb Price Distribution: New Zealand vs", cfg$area),
     x = "Price (NZD)",
     y = "Count",
-    fill = "Area"
-  )
+    fill = "Area")+
+  theme(plot.title = element_text(size = 14, hjust= 0.5),
+        legend.position = "right",
+        legend.text = element_text(size = 8),    # Makes the key labels smaller
+        legend.title = element_text(size = 8)) 
 save_plot(p_price_comparison, "09_price_distribution_nz_vs_chch")
 
 #--- Days Since Last Review ----------------------------------------------------
@@ -114,20 +108,17 @@ if (any(chch_data$days_since_last_review < 0, na.rm = TRUE)) {
 }
 
 #--- Days Since Last Review Plot ----------------------------------------------------
-p_days_since_review <- ggplot(
-  chch_data,
-  aes(x = days_since_last_review)
-) +
+p_days_since_review <- ggplot(chch_data,
+  aes(x = days_since_last_review)) +
   coord_cartesian(xlim = c(-10, 1000)) +
   geom_histogram(
     binwidth = 5,
-    na.rm = TRUE
-  ) +
+    na.rm = TRUE) +
   labs(
     title = "Distribution of Days Since Last Review",
     x = "Days Since Last Review",
-    y = "Count"
-  )
+    y = "Count")+
+  theme(plot.title = element_text(size = 14, hjust= 0.5)) 
 save_plot(p_days_since_review, "09_days_since_last_review")
 
 #--- Calculate top 10% number of reviews ---------------------------------------
