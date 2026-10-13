@@ -127,14 +127,20 @@ TBD
 
 median_price_chch_central <- read_csv(here("03_output","airbnb_median_price_chch_central.csv" ),show_col_types = FALSE)
 
-knitr::kable(median_price_chch_central, format = "markdown",caption = "Medain Airbnb Price, Christchurch Central") 
+median_price_chch_central_table <- tt(median_price_chch_central,digits = 2, fontsize = 0.9,
+                    caption = "Median Airbnb Price, Christchurch Central" )|> 
+  theme_striped()  |>   
+  style_tt(fontsize = 0.7, 
+           height = 0.8)
+
+median_price_chch_central_table
 ```
 
 {{< pagebreak >}}
 
 ### Short and Long Term Rental Maximum Price Difference
 
-### 
+#### Overall
 
 ```{r}
 #| label: Short and Long Term Rental Price Difference by suburb
@@ -162,7 +168,59 @@ wrap_elements(price_compare_ward)
 
 ```
 
-ADD IN EXTRACTED ROW FOR
+#### Latest Period Compared to Previous Period
+
+plots here
+
+The maximum price difference between long and short term rentals at the suburb level was found to be:
+
+```{r}
+
+```
+
+```{r}
+#| label: maximum price differenc suburb
+#| echo: false
+
+max_price_diff <- read_csv(here("03_output","maximum_price_difference.csv" ),show_col_types = FALSE)
+
+max_suburb <- max_price_diff[1, c(4, 2, 7, 8)]
+colnames(max_suburb) <- c("Location", "Airbnb Price (night)", "Rental Price (night)", "Price Difference (night)")
+
+
+max_suburb_table <- tt(max_suburb,digits = 2, fontsize = 0.9,
+                                      caption = "Median Airbnb Price, Christchurch Central" )|> 
+  theme_striped()  |>   
+  style_tt(fontsize = 0.7, 
+           height = 0.8)
+
+max_suburb_table
+
+```
+
+The maximum price difference between long and short term rentals in Christchurch at Ward level is:
+
+### 
+
+```{r}
+#| label: maximum price differenc ward
+#| echo: false
+
+max_price_diff <- read_csv(here("03_output","maximum_price_difference.csv" ),show_col_types = FALSE)
+
+max_ward <- max_price_diff[2, c(1, 2, 7, 8)]
+colnames(max_ward) <- c("Location", "Airbnb Price (night)", "Rental Price (night)", "Price Difference (night)")
+
+
+max_ward_table <- tt(max_ward, digits = 2, fontsize = 0.9,
+                       caption = "Median Airbnb Price, Christchurch Central" )|> 
+  theme_striped()  |>   
+  style_tt(fontsize = 0.7, 
+           height = 0.8)
+
+max_ward_table
+
+```
 
 ### Short and Long Term Rental Number of Beds By Location
 
