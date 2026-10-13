@@ -36,7 +36,8 @@ p_price_nz <- ggplot(nz_data, aes(x = price)) +
     title = "Distribution of Airbnb Prices in New Zealand",
     x = "Price",
     y = "Count"
-  )
+  )+
+  theme(plot.title = element_text(size = 14, hjust= 0.5))
 save_plot(p_price_nz, "09_price_distribution_nz")
 
 p_price_chch <- ggplot(chch_data, aes(x = price)) +

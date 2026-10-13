@@ -66,12 +66,11 @@ if (any(full_summary_ward$price_diff_per_night < 0, na.rm = TRUE)) {
 }
 
 # Find the row with the largest difference in price
-max_price_diff[1,] <- full_summary |> 
-                    slice_max(price_diff_per_night, n = 1)
 
-max_price_diff[2,] <- full_summary_ward |> 
-                        slice_max(price_diff_per_night, n = 1)
-max_price_diff 
+max_price_diff <- bind_rows(
+  full_summary      |> slice_max(price_diff_per_night, n = 1),
+  full_summary_ward |> slice_max(price_diff_per_night, n = 1)
+)
 
 
 #--- Output --------------------------------------------------------------
