@@ -37,22 +37,27 @@ From R / RStudio:
 
 ```r
 source("pipeline.R")
-run_pipeline()              # check folders and config.yaml, then run every script
-run_pipeline(from = 5)      # resume from script 05 onwards
+run_pipeline()              # check folders and config.yaml, run every script, render the report
+run_pipeline(from = 5)      # resume from script 05 onwards (then render the report)
+run_pipeline(report = FALSE)  # skip the report
+render_report()             # only re-render the report
 check_project_structure()   # only check folders, scripts and input files
 ```
 
 From a terminal in the project root:
 
 ```
-Rscript pipeline.R            # run every script
-Rscript pipeline.R --check    # only check folders and config.yaml
-Rscript pipeline.R --from 5   # resume from script 05
-make                          # only re-run steps whose inputs have changed
+Rscript pipeline.R              # run every script, then render the report
+Rscript pipeline.R --check      # only check folders and config.yaml
+Rscript pipeline.R --from 5     # resume from script 05 (then render the report)
+Rscript pipeline.R --no-report  # run the scripts but skip the report
+Rscript pipeline.R --report     # only re-render the report
+make                            # only re-run steps whose inputs have changed (including the report)
 ```
 
 Notes:
 
+- The last step renders the report (see Results report) to `04_documentation/01_analysis_results/Results.pdf`, so its plots and numbers always match the latest data. This needs Quarto (bundled with RStudio, or from <https://quarto.org>). If Quarto isn't found the data steps still finish and you get a warning.
 - The check step creates any missing output folders and stops with a clear message if a script, input file or `config.yaml` setting is wrong.
 - `make` re-runs only what is out of date, for example after adding a new month of Airbnb data or editing `config.yaml`. Do not use `make -j`, because the steps must run one after another. `make clean` removes generated files but keeps the API lookup cache; `make clean-all` removes that too.
 
@@ -111,7 +116,7 @@ Plots are saved to `03_output/00_plots/`, cleaning logs and the data summary to 
 
 ## Results report
 
-`04_documentation/01_analysis_results/Results.qmd` is a Quarto report. It reads files from `03_output/`, so run the pipeline before rendering it.
+`04_documentation/01_analysis_results/Results.qmd` is a Quarto report that is rendered to `Results.pdf` automatically at the end of `Rscript pipeline.R` and `make`. It builds its plots by running scripts 09 and 13 and reads the tables in `03_output/`. The descriptions under each graph calculate their numbers from the same data, so they update when new Airbnb months are added. To render it on its own, run the pipeline first, then use `Rscript pipeline.R --report` or the Render button in RStudio.
 
 ## Airbnb dataset
 

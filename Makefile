@@ -15,6 +15,7 @@ OUT   := 03_output
 DOC   := 04_documentation
 # Plots are written here by save_plot() in 02_scripts/00_tools/config.R
 PLOTS := $(OUT)/00_plots
+REPORT := $(DOC)/01_analysis_results/Results.pdf
 DATA  := 01_data
 SCR   := 02_scripts
 
@@ -32,7 +33,8 @@ FINAL := $(OUT)/airbnb_rental_properties_count_by_location.csv \
          $(OUT)/airbnb_median_price_chch_central.csv \
          $(DOC)/chch_summary.md \
          $(PLOTS)/09_price_distribution_nz.png \
-         $(PLOTS)/13_ward_price_airbnb_vs_rental.png
+         $(PLOTS)/13_ward_price_airbnb_vs_rental.png \
+         $(REPORT)
 
 # Check runs first as it creates missing output folders and stops with a clear
 # message if scripts, input files or config.yaml are wrong.
@@ -90,6 +92,11 @@ $(OUT)/airbnb_rental_properties_count_by_location.csv: $(SCR)/12_full_rental_com
 # 13: Rental vs Airbnb plots
 $(PLOTS)/13_ward_price_airbnb_vs_rental.png: $(SCR)/13_full_rental_pricevisualisation.R $(OUT)/full_rental_summary_byward.csv $(HELPERS)
 	Rscript $(SCR)/13_full_rental_pricevisualisation.R
+
+# Report: Results.qmd builds its plots from scripts 09 and 13 and reads the tables
+# above, so it is re-rendered whenever any of them change. Needs Quarto.
+$(REPORT): $(DOC)/01_analysis_results/Results.qmd $(SCR)/09_airbnb_chch_visualisation.R $(SCR)/13_full_rental_pricevisualisation.R $(HELPERS) config.yaml $(filter-out $(REPORT),$(FINAL))
+	Rscript pipeline.R --report
 
 clean:
 	rm -f $(filter-out $(OUT)/area_code_lookup.csv,$(wildcard $(OUT)/*.csv)) \
