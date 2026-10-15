@@ -1,240 +1,330 @@
 ---
 title: "Analysis Results"
-
 author: L4G4 Data Destroyers
 date: today
 date-format: "DD-MM-YYYY"
+number-sections: true
 
-
-
-format: 
+format:
   typst:
     mainfont: "Calibri"
     fontsize: 11pt
 
-project:
-  execute-dir: project 
-  
 editor: visual
 ---
 
 {{< pagebreak >}}
 
 ```{r}
-#| label: load libraries
+#| label: load-libraries
 #| include: false
 
-
 library(tidyverse)
-library(ggplot2)
 library(here)
 library(knitr)
-library(png) 
-library(patchwork)
 library(tinytable)
 
-source(here("02_scripts","00_tools","data_summary.R"))
+source(here("02_scripts", "00_tools", "data_summary.R"))
 ```
 
-## 1 AirBnB Data
+```{r}
+#| label: build-plots
+#| include: false
 
-An initial summary of the Airbnb data set for Christchurch was produced. This gave an overview of the data including column contents, maximum and minimum values . Of particular interest was the Price column summary (Table 1), which showed that price data is missing entirely from December 2025 to February 2026. We can also see how many missing prices there are for each month that there is price data, which can help in quantifying how much data may be lost if the decision is made to remove rows with no prices during cleaning.\
-\
+# The plots are built by the pipeline scripts themselves, so this report always
+# shows exactly what the scripts produce. Each script is sourced into its own
+# environment so the plot objects (p_...) and their data can be used below.
+# The scripts read from 03_output/, so the pipeline (Rscript pipeline.R or make)
+# renders this report automatically as its last step, after the data is up to
+# date. It can also be rendered on its own once the pipeline has run. Sourcing
+# also re-saves the PNGs in 03_output/00_plots/.
 
-```{r fig.align="center"}
-#| label: Price summary
+plots09 <- new.env()
+source(here("02_scripts", "09_airbnb_chch_visualisation.R"), local = plots09)
+
+plots13 <- new.env()
+source(here("02_scripts", "13_full_rental_pricevisualisation.R"), local = plots13)
+```
+
+```{r}
+#| label: report-values
+#| include: false
+
+# Numbers quoted in the descriptions are calculated here from the same data the
+# plots use, so the text updates itself when new Airbnb months are added.
+
+# "\\$" stops the dollar sign being read as maths by Pandoc
+fmt_money <- function(x) paste0("\\$", format(round(x), big.mark = ","))
+fmt_pct   <- function(x) paste0(round(100 * x), "%")
+fmt_int   <- function(x) format(round(x), big.mark = ",", scientific = FALSE)
+month_name <- function(ym) format(as.Date(paste0(sub("_", "-", ym), "-01")), "%B %Y")
+
+change_money <- function(old, new) {
+  d <- round(new - old)
+  if (d == 0) "unchanged" else paste0(if (d > 0) "up " else "down ", fmt_money(abs(d)))
+}
+change_days <- function(old, new) {
+  d <- round(new - old)
+  if (d == 0) "unchanged" else paste0(if (d > 0) "up " else "down ", abs(d), " days")
+}
+
+# Periods used in every comparison (baseline_end_month in config.yaml)
+first_month  <- month_name(plots09$periods$first)
+base_month   <- month_name(plots09$periods$baseline)
+latest_month <- month_name(plots09$periods$latest)
+
+# Price distributions (script 09)
+price_stats <- function(d) {
+  d |>
+    group_by(Version) |>
+    summarise(records = sum(!is.na(price)),
+              median  = median(price, na.rm = TRUE),
+              .groups = "drop") |>
+    arrange(Version)
+}
+chch_ps <- price_stats(plots09$chch_compare)
+nz_ps   <- price_stats(plots09$nz_compare)
+
+# Axis limits are set in script 09 (Christchurch plot 2000, comparison plot 1000)
+chch_over_2000 <- mean(plots09$chch_compare$price > 2000, na.rm = TRUE)
+chch_over_1000 <- mean(plots09$chch_compare$price > 1000, na.rm = TRUE)
+chch_100_300   <- mean(plots09$chch_compare$price >= 100 & plots09$chch_compare$price <= 300, na.rm = TRUE)
+nz_over_1000   <- mean(plots09$nz_compare$price > 1000, na.rm = TRUE)
+
+# Days since last review (script 09)
+review_stats <- plots09$review_comparison |>
+  group_by(Version) |>
+  summarise(median_days = median(days_since_last_review, na.rm = TRUE),
+            no_review   = mean(is.na(days_since_last_review)),
+            over_year   = mean(days_since_last_review > 365, na.rm = TRUE),
+            .groups = "drop") |>
+  arrange(Version)
+
+# Price comparisons (script 13)
+new_label <- plots13$periods$new_label
+
+sa2_stats <- plots13$sa2_prices |>
+  group_by(Version) |>
+  summarise(areas = n(),
+            share_above = mean(airbnb_price > rent_per_night),
+            median_ratio = median(airbnb_price / rent_per_night),
+            .groups = "drop") |>
+  arrange(Version)
+
+ward_wide <- plots13$ward_prices_long |>
+  pivot_wider(names_from = Type, values_from = price)
+ward_wide$gap <- ward_wide[[new_label]] - ward_wide$Rental
+ward_above <- sum(ward_wide$gap > 0, na.rm = TRUE)
+ward_total <- sum(!is.na(ward_wide$gap))
+ward_big   <- ward_wide[which.max(ward_wide$gap), ]
+ward_small <- ward_wide[which.min(ward_wide$gap), ]
+
+# Counts by ward (script 13)
+ward_counts <- plots13$ward_counts_long
+count_total <- function(prefix) {
+  sum(ward_counts$count[startsWith(ward_counts$Type, prefix)], na.rm = TRUE)
+}
+ward_top_updated <- ward_counts |>
+  filter(startsWith(Type, "Updated")) |>
+  slice_max(count, n = 1, with_ties = FALSE)
+rental_quarter <- as.character(plots13$reference_quarter)
+
+# Largest price differences (script 11: first row suburb, second row ward)
+max_diff <- read_csv(here("03_output", "maximum_price_difference.csv"),
+                     show_col_types = FALSE)
+```
+
+# AirBnB Data
+
+An initial summary of the Airbnb data set for Christchurch was produced. This gave an overview of the data including column contents, maximum and minimum values. Of particular interest was the Price column summary (Table 1), which showed that price data is missing entirely from December 2025 to February 2026. We can also see how many missing prices there are for each month that there is price data, which can help in quantifying how much data may be lost if the decision is made to remove rows with no prices during cleaning.
+
+```{r}
+#| label: price-summary
 #| echo: false
-chch_data_all <- read_csv(here("03_output","airbnb_chch_preprocessed.csv" ),show_col_types = FALSE)
+#| fig-align: center
+
+chch_data_all <- read_csv(here("03_output", "airbnb_chch_preprocessed.csv"),
+                          show_col_types = FALSE)
 price_summary <- numeric_summary(chch_data_all, price)
 
-
-summary_table <- tt(price_summary,digits = 2, fontsize = 0.9,
-   caption = "Summary Statistics for Christchurch Airbnb Prices" )|> 
-  theme_striped()  |>   
-  style_tt(fontsize = 0.7, 
-           height = 0.8)
+summary_table <- tt(price_summary, digits = 2, fontsize = 0.9,
+                    caption = "Summary Statistics for Christchurch Airbnb Prices") |>
+  theme_striped() |>
+  style_tt(fontsize = 0.7, height = 0.8)
 
 summary_table
 ```
 
-\
- A full summary of the Airbnb data for Christchurch can be found in Apppedix A.
+A full summary of the Airbnb data for Christchurch can be found in Appendix A.
 
-### 1.1 AirBnB Price Distribution Plots
+The graphs in this report compare an **original** version of the Airbnb data (`r first_month` to `r base_month`) with an **updated** version that also includes the newer months (`r first_month` to `r latest_month`). The updated version contains every record in the original version, so the two overlap. A listing appears once for each monthly snapshot it is in, so the counts below are listing records, not unique listings.
 
-#### Overall
+## AirBnB Price Distribution Plots
 
 ```{r}
-#| label: Christchurch price plot
+#| label: fig-price-chch
 #| echo: false
 #| fig-align: center
+#| fig-width: 7
+#| fig-height: 4.5
+#| fig-cap: "Distribution of Christchurch Airbnb prices, original vs updated"
 
-chch_price_plot <- readPNG(here("03_output","00_plots","09_price_distribution_chch.png"), native = TRUE)
-
-
-wrap_elements(chch_price_plot)
-
-
+plots09$p_price_chch
 ```
 
+**Description.** This histogram shows how nightly Airbnb prices (NZD) are spread across Christchurch listing records. Each bar counts the records in a \$10 price band. The blue bars are the original data and the orange bars are the updated data. Because the updated data includes everything in the original, the extra height of the orange bars is made up of records from the newer months (`r month_name(plots09$periods$latest)` is the latest). The distribution is strongly right-skewed: `r fmt_pct(chch_100_300)` of priced records are between \$100 and \$300 a night, with a long tail of expensive listings. The median price was `r fmt_money(chch_ps$median[1])` in the original data and `r fmt_money(chch_ps$median[2])` in the updated data (`r change_money(chch_ps$median[1], chch_ps$median[2])`). The updated data has `r fmt_int(chch_ps$records[2])` records with a price compared with `r fmt_int(chch_ps$records[1])` in the original. The axis stops at \$2,000, which hides the `r fmt_pct(chch_over_2000)` of priced records above that.
+
 ```{r}
-#| label: Christchurch vs NZ price plot
+#| label: fig-price-nz-vs-chch
 #| echo: false
 #| fig-align: center
+#| fig-width: 6.5
+#| fig-height: 7
+#| fig-cap: "Airbnb price distribution, New Zealand vs Christchurch"
 
-chchNZ_price_plot <- readPNG(here("03_output","00_plots","09_price_distribution_nz_vs_chch.png"), native = TRUE)
-
-
-wrap_elements(chchNZ_price_plot)
-
+plots09$p_price_comparison
 ```
 
-#### Latest Period Compared to Previous Period
+**Description.** These two panels put the Christchurch price distribution next to the one for all of New Zealand (which includes Christchurch), again with the original data in blue and the updated data in orange. Each bar is a \$25 price band and the axis is cut at \$1,000, which hides `r fmt_pct(nz_over_1000)` of New Zealand records and `r fmt_pct(chch_over_1000)` of Christchurch records. Both areas have the same right-skewed shape. The New Zealand median was `r fmt_money(nz_ps$median[1])` originally and `r fmt_money(nz_ps$median[2])` in the updated data, against `r fmt_money(chch_ps$median[1])` and `r fmt_money(chch_ps$median[2])` for Christchurch. The two panels share one count axis, so the Christchurch panel looks small. It is a small share of the national total, not a different shape, and the previous figure shows its distribution more clearly. The orange above the blue in each panel is the new records.
 
-PLOT TO GO HERE
-
-### 1.3 AirBnB - Days Since Last Review
-
-#### Overall
+## AirBnB - Days Since Last Review
 
 ```{r}
-#| label: Days since last Review plot
+#| label: fig-days-since-review
 #| echo: false
 #| fig-align: center
+#| fig-width: 7
+#| fig-height: 4.5
+#| fig-cap: "Days since last review for Christchurch listings, original vs updated"
 
-last_review_plot <- readPNG(here("03_output","00_plots","09_days_since_last_review.png"), native = TRUE)
-
-
-wrap_elements(last_review_plot)
-
+plots09$p_days_since_review
 ```
 
-#### Latest Period Compared to Previous Period
+**Description.** This histogram shows how long it had been since each Christchurch listing record last received a review, in 5-day bands. A low value means recent guest activity and a high value means the listing has gone quiet. Each version is measured to its own reference date, so the original data counts days up to `r as.character(plots09$baseline_date)` and the updated data counts up to `r as.character(plots09$updated_date)`. The median was `r round(review_stats$median_days[1])` days in the original data and `r round(review_stats$median_days[2])` days in the updated data (`r change_days(review_stats$median_days[1], review_stats$median_days[2])`). Records reviewed more than a year ago made up `r fmt_pct(review_stats$over_year[1])` of the original and `r fmt_pct(review_stats$over_year[2])` of the updated data. Records with no review date at all are not drawn: they are `r fmt_pct(review_stats$no_review[1])` of the original and `r fmt_pct(review_stats$no_review[2])` of the updated data. The spikes probably reflect many listings sharing the same last-review date, and the axis stops at 1,000 days.
 
-PLOT HERE
-
-### 1.4 AirBnB Top 10% of Reviews
-
-TBD
-
-## Airbnb and Long Term Rental Comparisons
-
-### AirBnB Median Price Christchurch central
+## AirBnB Top 10% of Reviews
 
 ```{r}
-#| label: median price chch central
+#| label: tbl-top-10-reviews
 #| echo: false
 
-median_price_chch_central <- read_csv(here("03_output","airbnb_median_price_chch_central.csv" ),show_col_types = FALSE)
+top10_table <- plots09$top_10_reviews |>
+  summarise(
+    `Listings in top 10%` = n(),
+    `In Christchurch` = sum(neighbourhood_group == plots09$cfg$area, na.rm = TRUE)
+  )
 
-median_price_chch_central_table <- tt(median_price_chch_central,digits = 2, fontsize = 0.9,
-                    caption = "Median Airbnb Price, Christchurch Central" )|> 
-  theme_striped()  |>   
-  style_tt(fontsize = 0.7, 
-           height = 0.8)
-
-median_price_chch_central_table
+tt(top10_table, caption = "Top 10% of Airbnb Listings by Number of Reviews") |>
+  theme_striped() |>
+  style_tt(fontsize = 0.7, height = 0.8)
 ```
+
+**Description.** This table takes the 10% of New Zealand listing records with the most reviews and counts how many of them are in Christchurch. Of the `r fmt_int(top10_table[[1]])` records in the top 10%, `r fmt_int(top10_table[[2]])` (`r fmt_pct(top10_table[[2]] / top10_table[[1]])`) are in Christchurch. Monthly snapshots are combined, so a heavily reviewed listing can appear more than once.
+
+# Airbnb and Long Term Rental Comparisons
+
+## AirBnB Median Price Christchurch Central
+
+```{r}
+#| label: tbl-median-price-chch-central
+#| echo: false
+
+median_price_chch_central <- read_csv(
+  here("03_output", "airbnb_median_price_chch_central.csv"),
+  show_col_types = FALSE
+)
+
+tt(median_price_chch_central, digits = 2, fontsize = 0.9,
+   caption = "Median Airbnb Price, Christchurch Central") |>
+  theme_striped() |>
+  style_tt(fontsize = 0.7, height = 0.8)
+```
+
+**Description.** This is the median nightly Airbnb price for `r median_price_chch_central[[1]][1]`, using all months of Airbnb data: `r fmt_money(median_price_chch_central[[2]][1])` a night.
 
 {{< pagebreak >}}
 
-### Short and Long Term Rental Maximum Price Difference
-
-#### Overall
+## Short and Long Term Rental Price Comparison
 
 ```{r}
-#| label: Short and Long Term Rental Price Difference by suburb
+#| label: fig-sa2-prices
 #| echo: false
 #| fig-align: center
+#| fig-width: 7
+#| fig-height: 5
+#| fig-cap: "Airbnb vs rental price per night by SA2 area"
 
-price_compare_suburb<- readPNG(here("03_output","00_plots","12_sa2_price_airbnb_vs_rental.png"), native = TRUE)
-
-
-wrap_elements(price_compare_suburb)
-
-
+plots13$p_sa2_prices
 ```
 
+**Description.** Each point is one Statistical Area 2 (SA2) area, with the weekly median rent converted to a nightly price on the horizontal axis and the median Airbnb price on the vertical axis. The dashed line is where the two prices are equal, so a point above the line means the Airbnb price is higher than the rental price. Every area has two points: blue for the original Airbnb data and orange for the updated data. The rental price is fixed to the original period (`r first_month` to `r base_month`), so only the Airbnb price moves between the two points. In the updated data `r sa2_stats$areas[2]` areas have both prices. In the original data `r fmt_pct(sa2_stats$share_above[1])` of them have a higher Airbnb price than rental price, and in the updated data `r fmt_pct(sa2_stats$share_above[2])` do. The typical Airbnb nightly price is `r round(sa2_stats$median_ratio[1], 1)` times the rental nightly price in the original data and `r round(sa2_stats$median_ratio[2], 1)` times in the updated data.
+
 ```{r}
-#| label: Short and Long Term Rental Price Difference by ward
+#| label: fig-ward-prices
 #| echo: false
 #| fig-align: center
+#| fig-width: 7
+#| fig-height: 5
+#| fig-cap: "Airbnb and rental prices per night by ward"
 
-price_compare_ward<- readPNG(here("03_output","00_plots","12_ward_price_airbnb_vs_rental.png"), native = TRUE)
-
-
-wrap_elements(price_compare_ward)
-
-
+plots13$p_ward_prices
 ```
 
-#### Latest Period Compared to Previous Period
+**Description.** The same comparison at ward level. Each row is a ward and each point is a median nightly price: blue for the original Airbnb data, orange for the updated Airbnb data and green for rental. SA2 areas are grouped into wards by the SA2-to-ward lookup, and the rental price is again fixed to the original period. The updated Airbnb price is above the rental price in `r ward_above` of the `r ward_total` wards that have both prices. Using the updated data, the ward with the largest gap between Airbnb and rental is `r ward_big$WARD2023_name` (`r fmt_money(ward_big[[new_label]])` Airbnb vs `r fmt_money(ward_big$Rental)` rental, a gap of `r fmt_money(ward_big$gap)`) and the smallest is `r ward_small$WARD2023_name` (a gap of `r fmt_money(ward_small$gap)`). Wards with no rental price have no green point, and areas with no ward are left out.
 
-plots here
-
-The maximum price difference between long and short term rentals at the suburb level was found to be:
+The maximum price difference between long and short term rentals at the suburb level, using all months of Airbnb data, was found to be:
 
 ```{r}
-
-```
-
-```{r}
-#| label: maximum price differenc suburb
+#| label: tbl-max-price-difference-suburb
 #| echo: false
 
-max_price_diff <- read_csv(here("03_output","maximum_price_difference.csv" ),show_col_types = FALSE)
+max_suburb <- max_diff[1, ] |>
+  select(Location = SA22026_name,
+         `Airbnb Price (night)` = median_Airbnb_price,
+         `Rental Price (night)` = median_rent_per_night,
+         `Price Difference (night)` = price_diff_per_night)
 
-max_suburb <- max_price_diff[1, c(4, 2, 7, 8)]
-colnames(max_suburb) <- c("Location", "Airbnb Price (night)", "Rental Price (night)", "Price Difference (night)")
-
-
-max_suburb_table <- tt(max_suburb,digits = 2, fontsize = 0.9,
-                                      caption = "Median Airbnb Price, Christchurch Central" )|> 
-  theme_striped()  |>   
-  style_tt(fontsize = 0.7, 
-           height = 0.8)
-
-max_suburb_table
-
+tt(max_suburb, digits = 2, fontsize = 0.9,
+   caption = "Largest Airbnb vs Rental Price Difference, by Suburb (SA2)") |>
+  theme_striped() |>
+  style_tt(fontsize = 0.7, height = 0.8)
 ```
 
-The maximum price difference between long and short term rentals in Christchurch at Ward level is:
+**Description.** `r max_suburb$Location` has the largest gap at suburb level: a median Airbnb price of `r fmt_money(max_suburb[[2]])` a night against a rental price of `r fmt_money(max_suburb[[3]])` a night, a difference of `r fmt_money(max_suburb[[4]])`. The rental price is the weekly median rent divided by seven.
 
-### 
+The maximum price difference between long and short term rentals in Christchurch at ward level is:
 
 ```{r}
-#| label: maximum price differenc ward
+#| label: tbl-max-price-difference-ward
 #| echo: false
 
-max_price_diff <- read_csv(here("03_output","maximum_price_difference.csv" ),show_col_types = FALSE)
+max_ward <- max_diff[2, ] |>
+  select(Location = WARD2023_name,
+         `Airbnb Price (night)` = median_airbnb_price,
+         `Rental Price (night)` = median_rent_per_night,
+         `Price Difference (night)` = price_diff_per_night)
 
-max_ward <- max_price_diff[2, c(1, 2, 7, 8)]
-colnames(max_ward) <- c("Location", "Airbnb Price (night)", "Rental Price (night)", "Price Difference (night)")
-
-
-max_ward_table <- tt(max_ward, digits = 2, fontsize = 0.9,
-                       caption = "Median Airbnb Price, Christchurch Central" )|> 
-  theme_striped()  |>   
-  style_tt(fontsize = 0.7, 
-           height = 0.8)
-
-max_ward_table
-
+tt(max_ward, digits = 2, fontsize = 0.9,
+   caption = "Largest Airbnb vs Rental Price Difference, by Ward") |>
+  theme_striped() |>
+  style_tt(fontsize = 0.7, height = 0.8)
 ```
 
-### Short and Long Term Rental Number of Beds By Location
+**Description.** At ward level the largest gap is in `r max_ward$Location`: a median Airbnb price of `r fmt_money(max_ward[[2]])` a night against a rental price of `r fmt_money(max_ward[[3]])` a night, a difference of `r fmt_money(max_ward[[4]])`. These two tables use every month of Airbnb data and every rental quarter in the period, so they will not exactly match the figures above, where rent is fixed to the original period.
 
-## Appendix
+## Airbnb Listings and Rental Bonds by Ward
 
-### A. Summary of Airbnb data for Christchurch
+```{r}
+#| label: fig-ward-counts
+#| echo: false
+#| fig-align: center
+#| fig-width: 12
+#| fig-height: 5
+#| fig-cap: "Original Airbnb, updated Airbnb and active rental bonds by ward"
 
-```{=typst}
-#columns(2, gutter: 12pt)[
+plots13$p_ward_counts
 ```
-::: {style="font-size: 0.8em;"}
-{{< include ../chch_summary.md >}}
-:::
 
-```{=typst}
-]
-```
+**Description.** These three bar charts show, for each ward, how many Airbnb listings there are and how many active rental bonds. The first panel is the original Airbnb data for `r base_month` alone, the second is the updated data for `r latest_month` alone, and the third is the number of active bonds in the rental reference quarter (`r rental_quarter`). Unlike the earlier figures these are single-month counts, not pooled snapshots. Each panel has its own horizontal scale, so compare the ranking of wards within a panel, not bar lengths across panels. Across the wards there are `r fmt_int(count_total("Original"))` Airbnb listings in the original month, `r fmt_int(count_total("Updated"))` in the updated month and `r fmt_int(count_total("Rental"))` active rental bonds. `r ward_top_updated$WARD2023_name` has the most Airbnb listings in the updated data (`r fmt_int(ward_top_updated$count)`). Listings in areas with no ward are not shown, and a ward with no rental figure has no bar in the third panel.
+
+{{< pagebreak >}}

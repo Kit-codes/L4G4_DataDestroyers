@@ -1,11 +1,17 @@
 #--- Pipeline ------------------------------------------------------------------
 # Runs the whole project with one call: checks the folders and config.yaml,
-# then runs every numbered script in 02_scripts/ in order.
+# then runs every numbered script in 02_scripts/ in order, then renders the
+# report (04_documentation/01_analysis_results/Results.qmd) to a PDF so its
+# plots and numbers always match the latest data. Rendering needs Quarto (it is
+# bundled with RStudio); if Quarto can't be found the report is skipped with a
+# warning and the data steps are unaffected.
 #
 # From the terminal (run from the project root):
-#   Rscript pipeline.R              # check, then run every script
+#   Rscript pipeline.R              # check, run every script, render the report
 #   Rscript pipeline.R --check      # only check folders and config.yaml
-#   Rscript pipeline.R --from 5     # resume from script 05 onwards
+#   Rscript pipeline.R --from 5     # resume from script 05 onwards (then render)
+#   Rscript pipeline.R --no-report  # run the scripts but skip the report
+#   Rscript pipeline.R --report     # only re-render the report
 #
 # With make, only the steps whose inputs have changed are re-run
 # (see the Makefile; do not use `make -j`):
@@ -13,8 +19,10 @@
 #
 # From R / RStudio console:
 #   source("pipeline.R")
-#   run_pipeline()                  # run every script
+#   run_pipeline()                  # run every script, then render the report
 #   run_pipeline(from = 5)          # resume from script 05 onwards
+#   run_pipeline(report = FALSE)    # skip the report
+#   render_report()                 # only re-render the report
 #   check_project_structure()       # only check folders, scripts and inputs
 #
 # Adding new Airbnb months:
@@ -86,7 +94,7 @@ check_project_structure <- function(root = find_project_root(), create = TRUE) {
   created  <- character()
   p <- function(...) file.path(root, ...)
   
-# Folders
+  # Folders
   for (d in create_dirs) {
     if (!dir.exists(p(d))) {
       if (create) {
@@ -98,7 +106,7 @@ check_project_structure <- function(root = find_project_root(), create = TRUE) {
     }
   }
   
-# Code, folders and scripts
+  # Code, folders and scripts
   for (d in code_dirs) {
     if (!dir.exists(p(d))) problems <- c(problems, paste0("Missing folder: ", d))
   }
@@ -126,7 +134,7 @@ check_project_structure <- function(root = find_project_root(), create = TRUE) {
     }
   }
   
-# Input data
+  # Input data
   for (f in required_inputs) {
     if (!file.exists(p(f))) {
       hint <- ""
@@ -158,13 +166,61 @@ check_project_structure <- function(root = find_project_root(), create = TRUE) {
   invisible(TRUE)
 }
 
+#--- Render report -------------------------------------------------------------
+# Renders the Quarto report to PDF after the data steps. The report builds its
+# plots from scripts 09 and 13 and reads the tables in 03_output/, so it must
+# run after them. Quarto runs from the project root so renv and here() work.
+report_qmd <- file.path("04_documentation", "01_analysis_results", "Results.qmd")
+
+find_quarto <- function() {
+  path <- unname(Sys.which("quarto"))
+  if (!nzchar(path) && requireNamespace("quarto", quietly = TRUE)) {
+    found <- tryCatch(quarto::quarto_path(), error = function(e) NULL)
+    if (length(found) == 1 && !is.na(found)) path <- found
+  }
+  if (!nzchar(path)) {
+    path <- Sys.getenv("RSTUDIO_QUARTO")   # Quarto bundled with RStudio
+    if (nzchar(path) && dir.exists(path)) {
+      path <- file.path(path, if (.Platform$OS.type == "windows") "quarto.exe" else "quarto")
+    }
+  }
+  path
+}
+
+# strict = TRUE stops with an error if the report can't be made; otherwise it
+# only warns, so a missing Quarto never hides finished data steps.
+render_report <- function(root = find_project_root(), strict = FALSE) {
+  input <- file.path(root, report_qmd)
+  fail <- function(msg) {
+    if (strict) stop(msg, call. = FALSE) else warning(msg, call. = FALSE)
+    invisible(FALSE)
+  }
+  if (!file.exists(input)) return(fail(paste0("Report not found: ", report_qmd)))
+  
+  quarto <- find_quarto()
+  if (!nzchar(quarto) || !file.exists(quarto)) {
+    return(fail(paste0(
+      "Quarto was not found, so the report was not rendered. Install Quarto ",
+      "(https://quarto.org) or render ", report_qmd, " from RStudio.")))
+  }
+  
+  cat("\n===== Rendering report =====\n")
+  status <- system2(quarto, c("render", shQuote(input), "--execute-dir", shQuote(root)))
+  if (!identical(as.integer(status), 0L)) {
+    return(fail(paste0("Rendering ", report_qmd, " failed (see messages above). ",
+                       "The data steps finished; re-run with: Rscript pipeline.R --report")))
+  }
+  message("Report saved to ", sub("\\.qmd$", ".pdf", report_qmd))
+  invisible(TRUE)
+}
+
 #--- Run Pipeline --------------------------------------------------------------
-run_pipeline <- function(from = 1L, check_only = FALSE) {
+run_pipeline <- function(from = 1L, check_only = FALSE, report = TRUE) {
   root <- find_project_root()
   setwd(root)
   check_project_structure(root)
   
-# Check config.yaml before any script runs
+  # Check config.yaml before any script runs
   library(here)
   helpers <- new.env()
   source(here("02_scripts", "00_tools", "config.R"), local = helpers)
@@ -180,7 +236,7 @@ run_pipeline <- function(from = 1L, check_only = FALSE) {
   scripts <- scripts[keep]
   if (length(scripts) == 0) stop("No scripts to run (from = ", from, ").")
   
-# Plots are written to 03_output/00_plots/ by save_plot().
+  # Plots are written to 03_output/00_plots/ by save_plot().
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   
@@ -203,6 +259,9 @@ run_pipeline <- function(from = 1L, check_only = FALSE) {
   plots <- list.files(here("03_output", "00_plots"), pattern = "\\.png$")
   cat(sprintf("\nDone in %.1f min. %d plot(s) in 03_output/00_plots/, tables in 03_output/.\n",
               as.numeric(difftime(Sys.time(), start, units = "mins")), length(plots)))
+  
+  # Render last, so the report uses the tables and plots made above
+  if (report) render_report(root)
   invisible(TRUE)
 }
 
@@ -215,5 +274,11 @@ if (!interactive() && sys.nframe() == 0L) {
     from <- suppressWarnings(as.integer(args[which(args == "--from") + 1]))
     if (is.na(from)) stop("--from needs a script number, e.g. --from 5")
   }
-  run_pipeline(from = from, check_only = "--check" %in% args)
+  if ("--report" %in% args) {
+    render_report(strict = TRUE)
+  } else {
+    run_pipeline(from = from,
+                 check_only = "--check" %in% args,
+                 report = !"--no-report" %in% args)
+  }
 }
