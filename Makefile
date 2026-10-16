@@ -49,7 +49,7 @@ $(OUT)/airbnb_chch_preprocessed.csv: $(SCR)/01_airbnb_preprocessing.R $(RAW) con
 	Rscript $(SCR)/01_airbnb_preprocessing.R
 
 # 02: tenancy data for the Airbnb date range
-$(OUT)/tenancy_chch_preprocessed.csv: $(SCR)/02_tenancy_preprocessing.R $(RAW) $(TENANCY) $(CHCH) $(HELPERS)
+$(OUT)/tenancy_chch_preprocessed.csv: $(SCR)/02_tenancy_preprocessing.R $(RAW) $(TENANCY) $(CHCH) config.yaml $(HELPERS)
 	Rscript $(SCR)/02_tenancy_preprocessing.R
 
 # 03, 04: cleaning
@@ -76,21 +76,21 @@ $(DOC)/chch_summary.md: $(SCR)/08_airbnb_datasummary.R $(OUT)/airbnb_chch_prepro
 	Rscript $(SCR)/08_airbnb_datasummary.R
 
 # 09: Airbnb plots
-$(PLOTS)/09_price_distribution_nz.png: $(SCR)/09_airbnb_chch_visualisation.R $(OUT)/airbnb_chch_preprocessed.csv config.yaml $(HELPERS)
+$(PLOTS)/09_price_distribution_nz.png: $(SCR)/09_airbnb_chch_visualisation.R $(OUT)/airbnb_nz_preprocessed.csv $(OUT)/airbnb_chch_preprocessed.csv config.yaml $(HELPERS)
 	Rscript $(SCR)/09_airbnb_chch_visualisation.R
 
 # 10, 11, 12: Price and property comparisons
 $(OUT)/airbnb_median_price_chch_central.csv: $(SCR)/10_airbnb_medianprice_chch_central.R $(OUT)/full_rental_summary_bylocation.csv config.yaml $(HELPERS)
 	Rscript $(SCR)/10_airbnb_medianprice_chch_central.R
 
-$(OUT)/full_rental_summary_withpricediff.csv: $(SCR)/11_full_rental_price_difference.R $(OUT)/full_rental_summary_bylocation.csv
+$(OUT)/full_rental_summary_withpricediff.csv: $(SCR)/11_full_rental_price_difference.R $(OUT)/full_rental_summary_bylocation.csv $(OUT)/full_rental_summary_byward.csv
 	Rscript $(SCR)/11_full_rental_price_difference.R
 
 $(OUT)/airbnb_rental_properties_count_by_location.csv: $(SCR)/12_full_rental_compare_properties.R $(OUT)/airbnb_chch_cleaned_witharea.csv $(OUT)/tenancy_chch_cleaned.csv config.yaml $(HELPERS)
 	Rscript $(SCR)/12_full_rental_compare_properties.R
 
 # 13: Rental vs Airbnb plots
-$(PLOTS)/13_ward_price_airbnb_vs_rental.png: $(SCR)/13_full_rental_pricevisualisation.R $(OUT)/full_rental_summary_byward.csv $(HELPERS)
+$(PLOTS)/13_ward_price_airbnb_vs_rental.png: $(SCR)/13_full_rental_pricevisualisation.R $(OUT)/airbnb_chch_cleaned_witharea.csv $(OUT)/tenancy_chch_cleaned.csv $(OUT)/full_rental_summary_byward.csv config.yaml $(HELPERS)
 	Rscript $(SCR)/13_full_rental_pricevisualisation.R
 
 # Report: Results.qmd builds its plots from scripts 09 and 13 and reads the tables
