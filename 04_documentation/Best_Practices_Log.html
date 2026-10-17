@@ -394,26 +394,27 @@ _(description) </p>
 </div>
 <div id="sanity-check-examples" class="section level4">
 <h4><strong>Sanity Check examples:</strong></h4>
-<p>Script 6 line 53 -  checks the output headers are what is expected
-and that the expected rows have been dropped</p>
-<p>Script 6 line 37 -  checks the output headers are what is expected
-and that the expected rows have been dropped</p>
-<p>Script 7 - #8 Checks - to make sure no listings have no area code</p>
-<p>Script 8 line 24-25  the sum of the number of airbnb properties in
+<ul>
+<li>Script 6 line 53 -  checks the output headers are what is expected
+and that the expected rows have been dropped</li>
+<li>Script 6 line 37 -  checks the output headers are what is expected
+and that the expected rows have been dropped</li>
+<li>Script 7 - #8 Checks - to make sure no listings have no area
+code</li>
+<li>Script 8 line 24-25  the sum of the number of airbnb properties in
 the summary data frame is compared to the number of rows in the full
 airbnb data set to make sure we have the same number of properties
-coming in and going out</p>
-<p>Check returns true if correct, false if not</p>
-<p><em>Note:additional sanity checks added during automation with error
+coming in and going out</li>
+<li>Check returns true if correct, false if not</li>
+</ul>
+<p><em>Note: additional sanity checks added during automation with error
 messaging and stops</em></p>
 </div>
 <div id="code-quality-improvements" class="section level2">
 <h2><strong>Code Quality Improvements</strong></h2>
 <p>Potential issues identified by AI (ChatGPT) during creation of Design
 Principles documentation</p>
-<ol style="list-style-type: decimal">
-<li><strong>Output filename mismatch:</strong></li>
-</ol>
+<p><strong>Output filename mismatch:</strong></p>
 <p>Script 7 writes airbnb_chch_cleaned_witharea.csv. with a trailing
 period. Scripts 8 and 11 read airbnb_chch_cleaned_witharea.csv without
 it. The paths do not match in the code and can prevent downstream
@@ -421,9 +422,7 @@ scripts from finding the generated file.</p>
 <ul>
 <li><em>Removed the trailing period</em></li>
 </ul>
-<ol start="2" style="list-style-type: decimal">
-<li><strong>Rental cleaning column names and log</strong></li>
-</ol>
+<p><strong>Rental cleaning column names and log</strong></p>
 <p>Script 6 uses dotted column names such as Geometric.Mean.Rent, while
 its comments and the README describe space-separated names such as
 Geometric Mean Rent. read_csv() normally preserves spaces in headers. If
@@ -436,18 +435,14 @@ tenancy_chch_cleaned.csv.</p>
 <li><em>Changed from dotted to spaced</em></li>
 <li><em>Corrected title of cleaning log</em></li>
 </ul>
-<ol start="3" style="list-style-type: decimal">
-<li><strong>Dependence on session state</strong></li>
-</ol>
+<p><strong>Dependence on session state</strong></p>
 <p>Scripts 4 and 10 call here() without loading here or using
 here::here(). They may work after another script loads the package, but
 can fail in a fresh session.</p>
 <ul>
 <li><em>Added library(here) to headers</em></li>
 </ul>
-<ol start="4" style="list-style-type: decimal">
-<li><strong>Missing input files and output directory</strong></li>
-</ol>
+<p><strong>Missing input files and output directory</strong></p>
 <p>The uploaded archive does not contain the Airbnb raw CSV folder, the
 rental CSV referenced by script 2, or a 3_output directory. The scripts
 do not create that directory before writing files. The original data and
@@ -461,9 +456,7 @@ space)</em></li>
 code to automatically create folder structure if it doesn’t exist to
 pipeline</em></li>
 </ul>
-<ol start="5" style="list-style-type: decimal">
-<li><strong>API test before cache reuse</strong></li>
-</ol>
+<p><strong>API test before cache reuse</strong></p>
 <p>The original api_key parameter is empty. Script 7 performs its test
 request before checking whether the lookup file exists, so a cache does
 not eliminate the initial requirement for API access. The test uses the
@@ -475,10 +468,8 @@ again in the subsequent bulk requests.</p>
 added separately</em></li>
 <li><em>added instructions on how to get an api key to readme</em> </li>
 </ul>
-<ol start="6" style="list-style-type: decimal">
-<li><strong>Lookup coverage response parsing and duplicate
-keys</strong></li>
-</ol>
+<p><strong>Lookup coverage response parsing and duplicate
+keys</strong></p>
 <p>Script 7 does not verify that an existing cache covers the current
 coordinates or uses the same layer. Missing cache coverage leaves
 listings unmatched. Its response parser assumes that matching SA2 code
@@ -491,9 +482,7 @@ listing rows during the left join.</p>
 <li><em>REVIEW: check if this needs addressing. Resolved: this is beyond
 scope</em></li>
 </ul>
-<ol start="7" style="list-style-type: decimal">
-<li><strong>Identifier and join types</strong></li>
-</ol>
+<p><strong>Identifier and join types</strong></p>
 <p>Earlier Airbnb stages infer identifier types even though scripts 7
 and 11 later read IDs as text. Very large IDs can lose precision if
 initially parsed as floating-point numbers, and a later conversion to
@@ -507,9 +496,7 @@ without the source CSVs.</p>
 <li><em>REVIEW: double check, but don’t think this is an issue using
 read_CSV. Resolved: Left as is, no issues.</em></li>
 </ul>
-<ol start="8" style="list-style-type: decimal">
-<li><strong>Date and snapshot selection</strong></li>
-</ol>
+<p><strong>Date and snapshot selection</strong></p>
 <p>Script 2 assumes an inferred TimeFrame type compatible with Date
 bounds. Script 11 compares it with “2026/04/01”. This is a conditional
 concern: a Date column can support the slash-formatted comparison,
@@ -523,9 +510,7 @@ June Airbnb subset are not checked for non-empty results.</p>
 <li><em>Review: have a closer look at the date formatting and if there
 is any major issue here. Resolved: change to how this is done</em></li>
 </ul>
-<ol start="9" style="list-style-type: decimal">
-<li><strong>pooled counts and the incomplete count check</strong></li>
-</ol>
+<p><strong>Pooled counts and the incomplete count check</strong></p>
 <p>Script 8’s Number_of_Airbnb_properties counts rows across snapshots
 rather than distinct listing IDs. A listing present in several snapshots
 can therefore contribute several observations. The field name can
@@ -542,9 +527,7 @@ nrow(airbnb_full) or stop when they disagree.</p>
 <ul>
 <li><em>Fixed</em></li>
 </ul>
-<ol start="10" style="list-style-type: decimal">
-<li> <strong>Price aggregation and missing values</strong></li>
-</ol>
+<p><strong>Price aggregation and missing values</strong></p>
 <p>Script 8 pools Airbnb snapshots and summarises rental quarters rather
 than matching individual periods. Its rental median is a median of
 quarterly medians, not a median of individual tenancy rents. Its maximum
@@ -565,9 +548,7 @@ interpretation.</p>
 <ul>
 <li><em>yes , thats all the data we have</em> </li>
 </ul>
-<ol start="11" style="list-style-type: decimal">
-<li><strong>Price filtering also affects property counts</strong></li>
-</ol>
+<p><strong>Price filtering also affects property counts</strong></p>
 <p>Script 11 uses the cleaned Airbnb data, so listings with missing
 prices have already been excluded even though a price is not needed to
 count an ID. Its count is consequently a count of retained listings
@@ -578,9 +559,7 @@ of all long-term rental homes.</p>
 <li><em>This probably isnt correct - review and maybe keep price na
 rows, or create a secondary set</em> </li>
 </ul>
-<ol start="12" style="list-style-type: decimal">
-<li> <strong>Missing counts converted to zero</strong></li>
-</ol>
+<p> <strong>Missing counts converted to zero</strong></p>
 <p>Script 11 replaces both absent-source counts and missing values in
 existing source rows with zero. Missing or unavailable information does
 not establish a true count of zero. The output does not distinguish
@@ -590,9 +569,7 @@ totals.</p>
 <li><em>REVIEW: working ok, so need to confirm not an issue. Resolved:
 tested and ok</em></li>
 </ul>
-<ol start="13" style="list-style-type: decimal">
-<li> <strong>Count and area-name join assumptions</strong></li>
-</ol>
+<p> <strong>Count and area-name join assumptions</strong></p>
 <p>Script 11 assumes one ALL/ALL rental record per SA2 for the selected
 quarter without checking it. Duplicate records could multiply joined
 counts. Its area names come from Airbnb coordinate lookups rather than
@@ -603,9 +580,7 @@ need to be checked against the data.</p>
 <ul>
 <li><em>Checked. Ok</em></li>
 </ul>
-<ol start="14" style="list-style-type: decimal">
-<li><strong>Christchurch Central extraction</strong></li>
-</ol>
+<p><strong>Christchurch Central extraction</strong></p>
 <p>Script 9 uses SA22026_name == “Christchurch Central” as a row index.
 Missing names produce missing logical indices, which can introduce
 missing elements into the selected vector. Taking its first element can
@@ -615,14 +590,12 @@ does not check that the intended area was found exactly once.</p>
 <li><em>there might be a cleaner way to do it, but the result is
 correct.</em></li>
 </ul>
-<ol start="15" style="list-style-type: decimal">
-<li><strong>Comments and cleaning claims</strong></li>
-</ol>
+<p><strong>Comments and cleaning claims</strong></p>
 <p>Script 11’s first comment says it compares beds, but it calculates
 distinct listing counts and active rental bond counts. It does not
 calculate bed or bedroom totals.</p>
 <ul>
-<li><em>REVIEW: seems ok.</em></li>
+<li><em>REVIEW: works, is ok.</em></li>
 </ul>
 <p>Script 5 states that license is entirely missing without asserting
 that condition. Its any_of() selection also permits named columns to be
@@ -635,10 +608,8 @@ licensing</em></li>
 <li><em>Added some extra context in the cleaning log to state its not
 needed</em></li>
 </ul>
-<ol start="16" style="list-style-type: decimal">
-<li> <strong>Interpretation of exploratory plots and review
-summaries</strong></li>
-</ol>
+<p> <strong>Interpretation of exploratory plots and review
+summaries</strong></p>
 <p>The histograms and top 10 percent selection use combined snapshot
 observations, so listings can contribute more than once. The price
 histograms compare raw counts; the New Zealand group includes
@@ -649,9 +620,7 @@ produce negative elapsed days.</p>
 <ul>
 <li><em>REVIEW: seems ok.</em></li>
 </ul>
-<ol start="17" style="list-style-type: decimal">
-<li><strong>Reproducibility and verification limits</strong></li>
-</ol>
+<p><strong>Reproducibility and verification limits</strong></p>
 <p>The supplied renv.lock records R version 4.6.1; dependency
 restoration and runtime compatibility were not tested. The project’s
 .gitignore excludes *.csv and *.csv.gz, so newly added raw and lookup
@@ -670,7 +639,7 @@ review environment. These findings are based on code inspection, not a
 complete pipeline run; no numerical results or successful end-to-end
 execution are claimed.</p>
 <ul>
-<li><em>Added in furture deliverable</em></li>
+<li><em>Added in future deliverable</em></li>
 </ul>
 </div>
 </div>
