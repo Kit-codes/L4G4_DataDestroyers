@@ -155,8 +155,6 @@ summary_table <- tt(price_summary, digits = 2, fontsize = 0.9,
 summary_table
 ```
 
-A full summary of the Airbnb data for Christchurch can be found in Appendix A.
-
 The graphs in this report compare an **original** version of the Airbnb data (`r first_month` to `r base_month`) with an **updated** version that also includes the newer months (`r first_month` to `r latest_month`). The updated version contains every record in the original version, so the two overlap. A listing appears once for each monthly snapshot it is in, so the counts below are listing records, not unique listings.
 
 ## AirBnB Price Distribution Plots

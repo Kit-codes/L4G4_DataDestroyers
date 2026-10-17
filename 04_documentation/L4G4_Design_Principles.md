@@ -1,6 +1,8 @@
 # Christchurch Rental Pipeline Design Principles
 
-L4G4 DataDestroyers | DATA201/422 group project
+##### L4G4 DataDestroyers \| DATA201/422 group project
+
+Produced using: ChatGPT
 
 Our R pipeline prepares Christchurch Airbnb listings and rental bond data, adds SA2 2026 area codes, and produces descriptive comparisons of prices and rental counts. National data supports the initial exploration, while the final comparisons focus on Christchurch. Sections 1 to 4 describe the original uploaded scripts. Section 5 lists the issues identified during review. No changes to the original code have been made for this version of the document.
 
@@ -69,7 +71,6 @@ Monthly summaries, cleaning logs, histograms, str(), displayed result tables, mi
 ### Use AI with human review
 
 AI used: OpenAI ChatGPT through the Codex coding agent. For this version, it reviewed the original supplied project and lecture slides and drafted this document, with identified problems recorded separately below. Following the Tuesday lecture on human-in-the-loop coding, the group remains responsible for the research aims, reviewing this description, running the pipeline with the original data and confirming that the resulting comparisons answer the intended questions.
-
 
 ## 5 Issues identified in the original project
 
